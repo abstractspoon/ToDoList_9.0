@@ -2701,11 +2701,10 @@ void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 			if (!CanClickButton(nAttribID, nBtnID, sValue))
 				break;
 
-			if (nBtnID != ID_BTN_DEFAULT)
-			{
+			if (nBtnID == ID_BTN_DEFAULT)
+				HandleTimePeriodEdit(nRow, bBtnClick);
+			else
 				OnEnEditButtonClick(0, nBtnID);
-				break;
-			}
 		}
 		else if (CanClickButton(nAttribID, ID_BTN_DEFAULT, sValue))
 		{
