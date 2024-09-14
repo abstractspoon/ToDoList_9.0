@@ -111,6 +111,10 @@ SOURCE=.\StdAfx.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\TDCRecurrenceHelper.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\ToDoList.cpp
 # End Source File
 # Begin Source File
@@ -128,6 +132,10 @@ SOURCE=.\resource.h
 # Begin Source File
 
 SOURCE=.\StdAfx.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\TDCRecurrenceHelper.h
 # End Source File
 # Begin Source File
 
