@@ -56,7 +56,7 @@ const int		MIN_XSCALE_SPACING	 = 50; // pixels
 
 /////////////////////////////////////////////////////////////////////////////////
 
-CGraphsMap::CGraphsMap()
+CGraphsMap::CGraphsMap() : m_bISODates(FALSE)
 {
 	AddGraph(BCT_TIMESERIES_INCOMPLETETASKS,	new CIncompleteTasksGraph());
 	AddGraph(BCT_TIMESERIES_REMAININGDAYS,		new CRemainingDaysGraph());
@@ -93,7 +93,9 @@ BOOL CGraphsMap::AddGraph(BURNDOWN_GRAPH nGraph, CGraphBase* pGraph)
 		return FALSE;
 	}
 
+	pGraph->SetDisplayISODates(m_bISODates);
 	SetAt(nGraph, pGraph);
+
 	return TRUE;
 }
 
@@ -125,6 +127,16 @@ CGraphBase* CGraphsMap::GetGraph(BURNDOWN_GRAPH nGraph) const
 BOOL CGraphsMap::HasGraph(BURNDOWN_GRAPH nGraph) const
 {
 	return (GetGraph(nGraph) != NULL);
+}
+
+void CGraphsMap::SetDisplayISODates(BOOL bISO)
+{
+	m_bISODates = bISO;
+
+	POSITION pos = GetStartPosition();
+
+	while (pos)
+		GetNext(pos)->SetDisplayISODates(bISO);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -171,6 +183,17 @@ BURNDOWN_GRAPHTYPE CGraphBase::GetType() const
 BURNDOWN_GRAPHOPTION CGraphBase::GetOption() const
 {
 	return m_nOption;
+}
+
+CString CGraphBase::FormatDate(const COleDateTime& date) const
+{
+	if (!CDateHelper::IsDateSet(date))
+		return _T("");
+
+	if (m_bISODates)
+		return date.Format(_T("%F"));
+
+	return date.Format(VAR_DATEVALUEONLY);
 }
 
 COLORREF CGraphBase::GetColor(int nColor) const
@@ -374,7 +397,7 @@ void CTimeSeriesGraph::RebuildXScale(const CStatsItemCalculator& calculator, int
 
 	for (int nDay = 0; nDay <= nNumDays; )
 	{
-		aLabels.SetAt(nDay, dh.FormatDate(dtTick));
+		aLabels.SetAt(nDay, FormatDate(dtTick));
 
 		// next Tick date
 		COleDateTime dtNextTick(dtTick);

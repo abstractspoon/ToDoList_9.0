@@ -285,6 +285,15 @@ void CBurndownChart::SetShowEmptyFrequencyValues(BOOL bShowEmpty)
 	}
 }
 
+void CBurndownChart::SetDisplayISODates(BOOL bISO)
+{
+	if (Misc::StateChanged(m_mapGraphs.IsDisplayingISODates(), bISO))
+	{
+		m_mapGraphs.SetDisplayISODates(bISO);
+		RebuildXScale();
+	}
+}
+
 BOOL CBurndownChart::HighlightDataPoint(int nIndex)
 {
 	CGraphBase* pGraph = NULL;

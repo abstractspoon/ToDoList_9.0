@@ -29,6 +29,7 @@ public:
 	BOOL SetActiveGraphOption(BURNDOWN_GRAPHOPTION nOption);
 	BOOL SetActiveGraphColors(const CColorArray& aColors);
 	void SetShowEmptyFrequencyValues(BOOL bShowEmpty);
+	void SetDisplayISODates(BOOL bISO);
 
 	BURNDOWN_GRAPH GetActiveGraph() const { return m_nActiveGraph; }
 	BURNDOWN_GRAPHOPTION GetActiveGraphOption() const;

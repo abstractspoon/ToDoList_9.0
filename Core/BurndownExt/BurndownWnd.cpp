@@ -239,6 +239,8 @@ void CBurndownWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 	}
 
 	// application preferences
+	m_chart.SetDisplayISODates(pPrefs->GetProfileInt(_T("Preferences"), _T("DisplayDatesInISO"), FALSE));
+
 	DWORD dwWeekends = pPrefs->GetProfileInt(_T("Preferences"), _T("Weekends"), (DHW_SATURDAY | DHW_SUNDAY));
 	double dHoursInDay = _ttof(pPrefs->GetProfileString(_T("Preferences"), _T("HoursInDay"), _T("8")));
 
