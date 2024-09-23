@@ -587,7 +587,7 @@ CString KANBANITEM::GetAttributeDisplayValue(TDC_ATTRIBUTE nAttribID, const CKan
 		return GetTrackedAttributeValue(KBUtils::GetAttributeID(nAttribID, aCustAttribDefs));
 
 	// else
-	return GetAttributeDisplayValue(nAttribID);
+	return GetAttributeDisplayValue(nAttribID, bISODates);
 }
 
 CString KANBANITEM::GetAttributeDisplayValue(TDC_ATTRIBUTE nAttribID, BOOL bISODates) const
