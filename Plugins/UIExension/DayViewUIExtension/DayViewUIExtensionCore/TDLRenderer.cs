@@ -321,26 +321,26 @@ namespace DayViewUIExtension
             using (SolidBrush brush = new SolidBrush(TextColor))
             {
 				g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
+
+				string amPmTime = "00";
+
+				if (ampm && !String.IsNullOrEmpty(DateTimeFormatInfo.CurrentInfo.AMDesignator))
 				{
-					string amPmTime = "00";
+					if (hour < 12)
+						amPmTime = DateTimeFormatInfo.CurrentInfo.AMDesignator;
+					else
+						amPmTime = DateTimeFormatInfo.CurrentInfo.PMDesignator;
 
-					if (ampm && !String.IsNullOrEmpty(DateTimeFormatInfo.CurrentInfo.AMDesignator))
-					{
-						if (hour < 12)
-							amPmTime = DateTimeFormatInfo.CurrentInfo.AMDesignator;
-						else
-							amPmTime = DateTimeFormatInfo.CurrentInfo.PMDesignator;
-
-						if (hour != 12)
-							hour = hour % 12;
-					}
-
-					String hourStr = hour.ToString("##00", System.Globalization.CultureInfo.InvariantCulture);
-					g.DrawString(hourStr, HourFont(), brush, rect);
-
-					rect.X += ((int)g.MeasureString(hourStr, HourFont()).Width + 2);
-					g.DrawString(amPmTime, MinuteFont(), brush, rect);
+					if (hour != 12)
+						hour = hour % 12;
 				}
+
+				String hourStr = hour.ToString("##00", System.Globalization.CultureInfo.InvariantCulture);
+				g.DrawString(hourStr, HourFont(), brush, rect);
+
+				rect.X += ((int)g.MeasureString(hourStr, HourFont()).Width + 2);
+				g.DrawString(amPmTime, MinuteFont(), brush, rect);
+
 				g.TextRenderingHint = TextRenderingHint.SystemDefault;
 			}
 		}
