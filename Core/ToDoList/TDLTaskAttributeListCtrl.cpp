@@ -275,6 +275,75 @@ void CTDLTaskAttributeListCtrl::ToggleSortDirection()
 		Sort();
 }
 
+void CTDLTaskAttributeListCtrl::Sort()
+{
+	CEnListCtrl::Sort();
+
+	// Fixup the 'Time of Day' fields to be immediately
+	// below their corresponding date fields
+	int nRow = GetItemCount();
+
+	while (nRow--)
+	{
+		TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
+
+		switch (nAttribID)
+		{
+		case TDCA_DONETIME:
+			if (FixupTimeOfDaySortPosition(nRow, nAttribID, TDCA_DONEDATE))
+				nRow++;
+			break;
+
+		case TDCA_DUETIME:
+			if (FixupTimeOfDaySortPosition(nRow, nAttribID, TDCA_DUEDATE))
+				nRow++;
+			break;
+
+		case TDCA_STARTTIME:
+			if (FixupTimeOfDaySortPosition(nRow, nAttribID, TDCA_STARTDATE))
+				nRow++;
+			break;
+
+		default:
+			if (IsCustomTime(nAttribID))
+			{
+				if (FixupTimeOfDaySortPosition(nRow, nAttribID, MapCustomTimeToDate(nAttribID)))
+					nRow++;
+			}
+			break;
+		}
+	}
+}
+
+BOOL CTDLTaskAttributeListCtrl::FixupTimeOfDaySortPosition(int nRow, TDC_ATTRIBUTE nTimeAttribID, TDC_ATTRIBUTE nDateAttribID)
+{
+	ASSERT(GetAttributeID(nRow) == nTimeAttribID);
+
+	int nDateRow = GetRow(nDateAttribID);
+
+	if (nRow == (nDateRow + 1))
+		return FALSE;
+
+	// Preserve row
+	CString sTimeLabel = GetItemText(nRow, ATTRIB_COL);
+	CString sTimeVal = GetItemText(nRow, VALUE_COL);
+	int nGroupID = GetGrouping().GetItemGroupId(nRow);
+
+	// Remove the item
+	DeleteItem(nRow);
+
+	// Adjust date field row if required
+	if (nRow < nDateRow)
+		nDateRow--;
+
+	// Insert time at correct position
+	nRow = InsertRow(sTimeLabel, (nDateRow + 1));
+	SetItemData(nRow, nTimeAttribID);
+	GetGrouping().SetItemGroupId(nRow, nGroupID);
+
+	return TRUE;
+}
+
 void CTDLTaskAttributeListCtrl::ToggleGrouping()
 {
 	m_bGrouped = !m_bGrouped;
