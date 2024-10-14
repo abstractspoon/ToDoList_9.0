@@ -542,8 +542,9 @@ int CTDLTaskAttributeListCtrl::GetGroupAttributes(TDC_ATTRIBUTEGROUP nGroup, CMa
 			if (attribDef.bEnabled)
 			{
 				TDC_ATTRIBUTE nAttribID = attribDef.GetAttributeID();
+				CEnString sAttrib(IDS_CUSTOMCOLUMN, attribDef.sLabel);
 
-				mapAttrib[nAttribID] = attribDef.sLabel;
+				mapAttrib[nAttribID] = sAttrib;
 
 				if (attribDef.IsDataType(TDCCA_DATE) && attribDef.HasFeature(TDCCAF_SHOWTIME))
 					mapAttrib[CUSTOMTIMEATTRIBID(nAttribID)] = sAttrib;
@@ -583,12 +584,13 @@ void CTDLTaskAttributeListCtrl::Populate()
 
 					POSITION pos = mapAttribs.GetStartPosition();
 					TDC_ATTRIBUTE nAttribID = TDCA_NONE;
-					CString sAttribName;
+					CString sAttrib;
 
 					while (pos)
 					{
-						mapAttribs.GetNextAssoc(pos, nAttribID, sAttribName);
-						int nRow = AddRow(sAttribName);
+						mapAttribs.GetNextAssoc(pos, nAttribID, sAttrib);
+
+						int nRow = AddRow(sAttrib);
 						SetItemData(nRow, nAttribID);
 						GetGrouping().SetItemGroupId(nRow, attribCat.nGroup);
 					}
