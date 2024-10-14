@@ -542,11 +542,12 @@ int CTDLTaskAttributeListCtrl::GetGroupAttributes(TDC_ATTRIBUTEGROUP nGroup, CMa
 			if (attribDef.bEnabled)
 			{
 				TDC_ATTRIBUTE nAttribID = attribDef.GetAttributeID();
+				CEnString sAttrib(IDS_CUSTOMCOLUMN, attribDef.sLabel);
 
-				mapAttrib[nAttribID] = attribDef.sLabel;
+				mapAttrib[nAttribID] = sAttrib;
 
 				if (attribDef.IsDataType(TDCCA_DATE) && attribDef.HasFeature(TDCCAF_SHOWTIME))
-					mapAttrib[MapCustomDateToTime(nAttribID)] = attribDef.sLabel;
+					mapAttrib[MapCustomDateToTime(nAttribID)] = sAttrib;
 			}
 		}
 	}
@@ -583,12 +584,13 @@ void CTDLTaskAttributeListCtrl::Populate()
 
 					POSITION pos = mapAttribs.GetStartPosition();
 					TDC_ATTRIBUTE nAttribID = TDCA_NONE;
-					CString sAttribName;
+					CString sAttrib;
 
 					while (pos)
 					{
-						mapAttribs.GetNextAssoc(pos, nAttribID, sAttribName);
-						int nRow = AddRow(sAttribName);
+						mapAttribs.GetNextAssoc(pos, nAttribID, sAttrib);
+
+						int nRow = AddRow(sAttrib);
 						SetItemData(nRow, nAttribID);
 						GetGrouping().SetItemGroupId(nRow, attribCat.nGroup);
 					}
@@ -618,13 +620,15 @@ void CTDLTaskAttributeListCtrl::Populate()
 
 				if (attribDef.bEnabled)
 				{
-					int nItem = AddRow(CEnString(IDS_CUSTOMCOLUMN, attribDef.sLabel));
-					SetItemData(nItem, attribDef.GetAttributeID());
+					CEnString sAttrib(IDS_CUSTOMCOLUMN, attribDef.sLabel);
+
+					int nRow = AddRow(sAttrib);
+					SetItemData(nRow, attribDef.GetAttributeID());
 
 					if (attribDef.IsDataType(TDCCA_DATE) && attribDef.HasFeature(TDCCAF_SHOWTIME))
 					{
-						int nItem = AddRow(CEnString(IDS_CUSTOMCOLUMN, attribDef.sLabel));
-						SetItemData(nItem, MapCustomDateToTime(attribDef.GetAttributeID()));
+						nRow = AddRow(sAttrib);
+						SetItemData(nRow, MapCustomDateToTime(attribDef.GetAttributeID()));
 					}
 				}
 			}
