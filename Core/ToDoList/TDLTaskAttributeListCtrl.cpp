@@ -275,6 +275,7 @@ void CTDLTaskAttributeListCtrl::ToggleSortDirection()
 		Sort();
 }
 
+/*
 void CTDLTaskAttributeListCtrl::Sort()
 {
 	CEnListCtrl::Sort();
@@ -343,6 +344,7 @@ BOOL CTDLTaskAttributeListCtrl::FixupTimeOfDaySortPosition(int nRow, TDC_ATTRIBU
 
 	return TRUE;
 }
+*/
 
 void CTDLTaskAttributeListCtrl::ToggleGrouping()
 {
