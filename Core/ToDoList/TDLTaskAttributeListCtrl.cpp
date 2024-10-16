@@ -620,7 +620,9 @@ void CTDLTaskAttributeListCtrl::Populate()
 
 				if (attribDef.bEnabled)
 				{
-					int nRow = AddRow(CEnString(IDS_CUSTOMCOLUMN, attribDef.sLabel));
+					CEnString sAttrib(IDS_CUSTOMCOLUMN, attribDef.sLabel);
+
+					int nRow = AddRow(sAttrib);
 					SetItemData(nRow, attribDef.GetAttributeID());
 
 					if (attribDef.IsDataType(TDCCA_DATE) && attribDef.HasFeature(TDCCAF_SHOWTIME))

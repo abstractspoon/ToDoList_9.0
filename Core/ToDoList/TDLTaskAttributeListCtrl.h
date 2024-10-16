@@ -257,8 +257,6 @@ protected:
 	void GetSplitterRect(CRect& rSplitBar) const;
 	void RecalcColumnWidths(int nAttribColWidth = -1, int cx = -1);
 	BOOL SetValueText(int nRow, const CString& sNewText);
-// 	void Sort();
-// 	BOOL FixupTimeOfDaySortPosition(int nRow, TDC_ATTRIBUTE nTimeAttribID, TDC_ATTRIBUTE nDateAttribID);
 
 	int HitTestButtonID(int nRow) const;
 	int HitTestButtonID(int nRow, const CRect& rBtn) const;
