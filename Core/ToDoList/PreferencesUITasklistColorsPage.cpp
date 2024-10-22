@@ -942,7 +942,7 @@ void CPreferencesUITasklistColorsPage::LoadPreferences(const IPreferences* pPref
 	m_bSpecifyReferenceColor = pPrefs->GetProfileInt(szKey, _T("ReferenceColor"), FALSE);
 	m_bSpecifyGroupHeaderBkgndColor = pPrefs->GetProfileInt(szKey, _T("SpecifyGroupHeaderBkgndColor"), FALSE);
 
-	CColourButton::LoadPreferences(pPrefs);
+	CColorButton::LoadPreferences(pPrefs);
 
 	// colors
 	CString sColorKey(szKey);
@@ -1131,7 +1131,7 @@ void CPreferencesUITasklistColorsPage::SavePreferences(IPreferences* pPrefs, LPC
 	pPrefs->WriteProfileInt(szKey, _T("ReferenceColor"), m_bSpecifyReferenceColor);
 	pPrefs->WriteProfileInt(szKey, _T("SpecifyGroupHeaderBkgndColor"), m_bSpecifyGroupHeaderBkgndColor);
 
-	CColourButton::SavePreferences(pPrefs);
+	CColorButton::SavePreferences(pPrefs);
 
 	pPrefs->WriteProfileInt(sColorKey, _T("Gridlines"), m_crGridlines);
 	pPrefs->WriteProfileInt(sColorKey, _T("TaskDone"), m_crDone);
