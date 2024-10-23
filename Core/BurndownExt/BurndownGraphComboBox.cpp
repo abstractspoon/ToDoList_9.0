@@ -64,7 +64,7 @@ BOOL CBurndownGraphComboBox::Initialise(const CBurndownChart& chart)
 		const GRAPHTYPE& gt = GRAPHTYPES[nType];
 
 		// Add heading
-		int nHeading = CDialogHelper::AddString(*this, gt.nLabelID, gt.nType);
+		int nHeading = CDialogHelper::AddStringT(*this, gt.nLabelID, gt.nType);
 		SetHeadingItem(nHeading);
 
 		// For each type, sort all the related graphs by name
@@ -75,7 +75,7 @@ BOOL CBurndownGraphComboBox::Initialise(const CBurndownChart& chart)
 		for (int nItem = 0; nItem < aGraphs.GetSize(); nItem++)
 		{
 			BURNDOWN_GRAPH nGraph = aGraphs[nItem];
-			CDialogHelper::AddString(*this, chart.GetGraphTitle(nGraph), nGraph);
+			CDialogHelper::AddStringT(*this, chart.GetGraphTitle(nGraph), nGraph);
 		}
 	}
 
@@ -104,7 +104,7 @@ void CBurndownGraphComboBox::DDX(CDataExchange* pDX, BURNDOWN_GRAPH& nGraph)
 	}
 	else
 	{
-		SetCurSel(CDialogHelper::FindItemByData(*this, nGraph));
+		SetCurSel(CDialogHelper::FindItemByDataT(*this, nGraph));
 	}
 }
 
