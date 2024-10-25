@@ -65,6 +65,7 @@ public:
 
  	BOOL Sort(TDC_ATTRIBUTE nBy, BOOL bAscending);
 	BOOL GroupBy(TDC_ATTRIBUTE nAttribID);
+	TDC_ATTRIBUTE GetGroupBy() const { return m_nGroupBy; }
 
 	void SetOptions(DWORD dwOptions);
 	DWORD GetOptions() const { return m_dwOptions; }
@@ -143,6 +144,7 @@ protected:
 	afx_msg void OnHeaderCustomDraw(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnHeaderClick(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnHeaderItemChanging(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnEndTrackHeaderItem(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnHeaderDividerDoubleClick(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnDestroy();
 	afx_msg LRESULT OnMidnight(WPARAM wp, LPARAM lp);
@@ -199,7 +201,7 @@ protected:
 	BOOL SelectClosestAdjacentItemToSelection(int nAdjacentCol);
 	int MapHeaderItemToColumn(int nItem) const;
 
-	inline BOOL UsingFixedColumns() const { return m_aColumnDefs.GetSize(); }
+	inline BOOL UsingFixedColumns() const { return ((m_nTrackedAttributeID == TDCA_FIXEDCOLUMNS) && m_aColumnDefs.GetSize()); }
 	inline BOOL UsingDynamicColumns() const { return !UsingFixedColumns(); }
 
 	BOOL IsDragging() const;

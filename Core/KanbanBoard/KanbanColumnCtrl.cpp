@@ -3016,7 +3016,7 @@ BOOL CKanbanColumnCtrl::CanDrag(const CKanbanColumnCtrl* pSrcCol, const CKanbanC
 	if (pSrcCol->AttributeValuesMatch(*pDestCol))
 		return FALSE;
 
-	// Can't copy FROM the backlog
+	// Can't COPY from the backlog
 	if (pSrcCol->IsBacklog() && Misc::ModKeysArePressed(MKS_CTRL))
 		return FALSE;
 

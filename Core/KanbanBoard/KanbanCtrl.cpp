@@ -130,6 +130,7 @@ BEGIN_MESSAGE_MAP(CKanbanCtrl, CWnd)
 	ON_NOTIFY(HDN_ITEMCLICK, IDC_HEADER, OnHeaderClick)
 	ON_NOTIFY(HDN_DIVIDERDBLCLICK, IDC_HEADER, OnHeaderDividerDoubleClick)
 	ON_NOTIFY(HDN_ITEMCHANGING, IDC_HEADER, OnHeaderItemChanging)
+	ON_NOTIFY(HDN_ENDTRACK, IDC_HEADER, OnEndTrackHeaderItem)
 	ON_NOTIFY(TVN_BEGINDRAG, IDC_COLUMNCTRL, OnBeginDragColumnItem)
 	ON_NOTIFY(TVN_SELCHANGED, IDC_COLUMNCTRL, OnColumnItemSelChange)
 	ON_NOTIFY(NM_SETFOCUS, IDC_COLUMNCTRL, OnColumnSetFocus)
@@ -1177,10 +1178,12 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, TDC_A
 
 			for (int nCust = 0; nCust < nNumCust; nCust++)
 			{
-				// Save off each attribute ID
+				// Update our list of attributes without changing their positions
+				CString sAttribID(pTasks->GetCustomAttributeID(nCust));
+				int nExist = m_aCustomAttribDefs.FindDefinition(sAttribID);
+				
 				if (pTasks->IsCustomAttributeEnabled(nCust))
 				{
-					CString sAttribID(pTasks->GetCustomAttributeID(nCust));
 					CString sAttribName(pTasks->GetCustomAttributeLabel(nCust));
 
 					DWORD dwCustType = pTasks->GetCustomAttributeType(nCust);
@@ -1192,9 +1195,10 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, TDC_A
 						BOOL bMultiList = ((dwListType == TDCCA_FIXEDMULTILIST) || 
 											(dwListType == TDCCA_AUTOMULTILIST));
 
-						int nDef = m_aCustomAttribDefs.AddDefinition(sAttribID, sAttribName, bMultiList);
+						if (nExist == -1)
+							nExist = m_aCustomAttribDefs.AddDefinition(sAttribID, sAttribName, bMultiList);
 
-						// Add 'default' values to the map
+						// Update mapped 'default' values
 						CKanbanValueMap* pDefValues = m_mapGlobalAttributeValues.GetAddMapping(sAttribID);
 						ASSERT(pDefValues);
 
@@ -1218,10 +1222,39 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, TDC_A
 						bChange |= UpdateGlobalAttributeValues(sAttribID, aAutoValues);
 					}
 				}
+				else if (nExist != -1)
+				{
+					m_aCustomAttribDefs.RemoveAt(nExist);
+				}
 			}
 
-			if (m_nTrackedAttributeID == TDCA_CUSTOMATTRIB)
-				m_nTrackedAttributeID = m_aCustomAttribDefs.GetDefinitionID(m_sTrackAttribID);
+			// Handle the tracked attribute having disappeared
+			if ((m_nTrackedAttributeID == TDCA_CUSTOMATTRIB) && 
+				(m_aCustomAttribDefs.FindDefinition(m_sTrackAttribID) == -1))
+			{
+				m_nTrackedAttributeID = TDCA_STATUS;
+				m_sTrackAttribID = KBUtils::GetAttributeID(m_nTrackedAttributeID);
+
+				bChange = TRUE;
+			}
+
+			// Handle the group attribute having disappeared or 
+			// being the same as the tracked attribute
+			if (m_nGroupBy == TDCA_CUSTOMATTRIB &&
+				((m_aCustomAttribDefs.FindDefinition(m_sGroupByCustAttribID) == -1) || (m_sGroupByCustAttribID == m_sTrackAttribID)))
+			{
+				m_nGroupBy = TDCA_NONE;
+				m_sGroupByCustAttribID.Empty();
+
+				bChange = TRUE;
+			}
+			else if (m_nGroupBy == m_nTrackedAttributeID)
+			{
+				m_nGroupBy = TDCA_NONE;
+				m_sGroupByCustAttribID.Empty();
+
+				bChange = TRUE;
+			}
 
 			return bChange;
 		}
@@ -1257,7 +1290,6 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(LPCTSTR szAttribID, const CStringA
 	if (!Misc::MatchAll(mapNewValues, *pValues))
 	{
 		Misc::Copy(mapNewValues, *pValues);
-
 		return IsTracking(szAttribID);
 	}
 
@@ -2067,6 +2099,7 @@ BOOL CKanbanCtrl::GroupBy(TDC_ATTRIBUTE nAttribID)
 	if (nAttribID != m_nGroupBy)
 	{
 		m_nGroupBy = nAttribID;
+		m_sGroupByCustAttribID = m_aCustomAttribDefs.GetDefinitionID(nAttribID);
 		m_aColumns.GroupBy(nAttribID);
 	}
 	
@@ -2675,10 +2708,7 @@ KBC_ATTRIBLABELS CKanbanCtrl::GetColumnAttributeLabelVisibility(int nCol, int nC
 	if (CanFitAttributeLabels(nAvailWidth, fAveCharWidth, KBCAL_LONG))
 		return KBCAL_LONG;
 
-//	if (CanFitAttributeLabels(nAvailWidth, fAveCharWidth, KBCAL_SHORT))
-		return KBCAL_SHORT;
-
-//	return KBCAL_NONE;
+	return KBCAL_SHORT;
 }
 
 // Called externally only
@@ -3105,6 +3135,24 @@ int CKanbanCtrl::MapHeaderItemToColumn(int nItem) const
 	}
 
 	return nCol;
+}
+
+void CKanbanCtrl::OnEndTrackHeaderItem(NMHDR* pNMHDR, LRESULT* /*pResult*/)
+{
+	NMHEADER* pHDN = (NMHEADER*)pNMHDR;
+
+	ASSERT(pHDN->iItem < (m_header.GetItemCount() - 1));
+
+	// Update label format for 'this' and 'next' columns
+	int nCol = pHDN->iItem;
+	int nWidth = m_header.GetItemWidth(nCol);
+	KBC_ATTRIBLABELS nAttribVis = GetColumnAttributeLabelVisibility(nCol, nWidth);
+	m_aColumns[nCol]->SetAttributeLabelVisibility(nAttribVis);
+	
+	nCol += 1;
+	nWidth = m_header.GetItemWidth(nCol);
+	nAttribVis = GetColumnAttributeLabelVisibility(nCol, nWidth);
+	m_aColumns[nCol]->SetAttributeLabelVisibility(nAttribVis);
 }
 
 void CKanbanCtrl::OnHeaderItemChanging(NMHDR* pNMHDR, LRESULT* /*pResult*/)
