@@ -110,7 +110,8 @@ CKanbanCtrl::CKanbanCtrl()
 	m_bResizingHeader(FALSE),
 	m_bSettingColumnFocus(FALSE),
 	m_bSavingToImage(FALSE),
-	m_crGroupHeaderBkgnd(CLR_NONE)
+	m_crGroupHeaderBkgnd(CLR_NONE),
+	m_crFullColumn(CLR_NONE)
 {
 }
 
@@ -327,7 +328,7 @@ BOOL CKanbanCtrl::HandleKeyDown(WPARAM wp, LPARAM /*lp*/)
 
 				if (pKI)
 				{
-					VERIFY(pCol->DeleteTask(dwTaskID));
+					VERIFY(pCol->RemoveTask(dwTaskID));
 
 					if (!pKI->HasTrackedAttributeValues(m_sTrackAttribID))
 					{
@@ -1229,18 +1230,27 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, TDC_A
 			}
 
 			// Handle the tracked attribute having disappeared
-			if ((m_nTrackedAttributeID == TDCA_CUSTOMATTRIB) && 
-				(m_aCustomAttribDefs.FindDefinition(m_sTrackAttribID) == -1))
+			if (KBUtils::IsCustomAttribute(m_nTrackedAttributeID))
 			{
-				m_nTrackedAttributeID = TDCA_STATUS;
-				m_sTrackAttribID = KBUtils::GetAttributeID(m_nTrackedAttributeID);
+				nAttribID = m_aCustomAttribDefs.GetDefinitionID(m_sTrackAttribID);
+				
+				if (nAttribID == TDCA_NONE)
+				{
+					m_nTrackedAttributeID = TDCA_NONE;
+					m_sTrackAttribID.Empty();
 
-				bChange = TRUE;
+					bChange = TRUE;
+				}
+				else if (nAttribID != m_nTrackedAttributeID)
+				{
+					m_nTrackedAttributeID = nAttribID;
+					bChange = TRUE;
+				}
 			}
 
 			// Handle the group attribute having disappeared or 
 			// being the same as the tracked attribute
-			if (m_nGroupBy == TDCA_CUSTOMATTRIB &&
+			if (KBUtils::IsCustomAttribute(m_nGroupBy) &&
 				((m_aCustomAttribDefs.FindDefinition(m_sGroupByCustAttribID) == -1) || (m_sGroupByCustAttribID == m_sTrackAttribID)))
 			{
 				m_nGroupBy = TDCA_NONE;
@@ -1586,7 +1596,7 @@ BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, const CString& s
 
 				if (pCurCol)
 				{
-					VERIFY(pCurCol->DeleteTask(pKI->dwTaskID));
+					VERIFY(pCurCol->RemoveTask(pKI->dwTaskID));
 					bRebuild |= (pCurCol->IsEmpty() && HasOption(KBCF_HIDEEMPTYCOLUMNS));
 				}
 
@@ -1978,6 +1988,9 @@ void CKanbanCtrl::RefreshColumnHeaderText()
 {
 	int nNumColumns = m_aColumns.GetSize(), nVis = 0;
 
+	if (nNumColumns == 0)
+		return;
+
 	for (int nCol = 0; nCol < nNumColumns; nCol++)
 	{
 		const CKanbanColumnCtrl* pCol = m_aColumns[nCol];
@@ -1991,7 +2004,19 @@ void CKanbanCtrl::RefreshColumnHeaderText()
 			sTitle.LoadString(IDS_BACKLOG);
 
 		CString sFormat;
-		sFormat.Format(_T("%s (%d)"), sTitle, pCol->GetCount());
+		int nCount = pCol->GetCount(), nMaxCount = pCol->GetMaxCount();
+
+		if (nMaxCount > 0)
+		{
+			if (nCount >= nMaxCount)
+				sFormat.Format(_T("%s (%s)"), sTitle, CEnString(IDS_COLUMNFULL));
+			else
+				sFormat.Format(_T("%s (%d/%d)"), sTitle, nCount, nMaxCount);
+		}
+		else
+		{
+			sFormat.Format(_T("%s (%d)"), sTitle, nCount);
+		}
 
 		m_header.SetItemText(nVis, sFormat);
 		m_header.SetItemData(nVis, (DWORD)pCol);
@@ -2108,7 +2133,7 @@ BOOL CKanbanCtrl::GroupBy(TDC_ATTRIBUTE nAttribID)
 
 TDC_ATTRIBUTE CKanbanCtrl::GetTrackedAttribute(CString& sCustomAttrib) const
 {
-	if (m_nTrackedAttributeID == TDCA_CUSTOMATTRIB)
+	if (KBUtils::IsCustomAttribute(m_nTrackedAttributeID))
 		sCustomAttrib = m_sTrackAttribID;
 	else
 		sCustomAttrib.Empty();
@@ -2174,18 +2199,19 @@ BOOL CKanbanCtrl::TrackAttribute(TDC_ATTRIBUTE nAttribID, const CString& sCustom
 					if (pCol)
 					{
 						pCol->SetBackgroundColor(colDef.crBackground);
-						//pCol->SetExcessColor(colDef.crExcess);
-						//pCol->SetMaximumTaskCount(colDef.nMaxTaskCount);
+						pCol->SetMaximumTaskCount(colDef.nMaxTaskCount);
 
 						m_aColumnDefs[nCol] = colDef;
 					}
 				}
 	
+				RefreshColumnHeaderText();
 				return TRUE;
 			}
 		}
 		else if (!aColumnDefs.GetSize()) // not switching to fixed columns
 		{
+			ASSERT(m_aColumnDefs.GetSize() == 0);
 			return TRUE;
 		}
 	}
@@ -2223,6 +2249,7 @@ CKanbanColumnCtrl* CKanbanCtrl::AddNewColumn(const KANBANCOLUMN& colDef)
 	{
 		pCol->SetOptions(m_dwOptions);
 		pCol->SetGroupHeaderBackgroundColor(m_crGroupHeaderBkgnd);
+		pCol->SetFullColor(m_crFullColumn);
 		pCol->GroupBy(m_nGroupBy);
 
 		if (pCol->Create(IDC_COLUMNCTRL, this))
@@ -2251,7 +2278,7 @@ BOOL CKanbanCtrl::RebuildColumnContents(CKanbanColumnCtrl* pCol, const CKanbanIt
 	pCol->GetSelectedTaskIDs(aSelTaskIDs);
 
 	pCol->SetRedraw(FALSE);
-	pCol->DeleteAll();
+	pCol->RemoveAll();
 
 	CStringArray aValueIDs;
 	int nNumVals = pCol->GetAttributeValueIDs(aValueIDs);
@@ -2781,6 +2808,15 @@ void CKanbanCtrl::SetPriorityColors(const CDWordArray& aColors)
 		// Redraw the lists if coloring by priority
 		if (GetSafeHwnd() && HasOption(KBCF_COLORBARBYPRIORITY))
 			m_aColumns.Redraw(FALSE);
+	}
+}
+
+void CKanbanCtrl::SetFullColumnColor(COLORREF crFull)
+{
+	if (crFull != m_crFullColumn)
+	{
+		m_crFullColumn = crFull;
+		m_aColumns.SetFullColumnColor(crFull);
 	}
 }
 
@@ -3555,7 +3591,7 @@ BOOL CKanbanCtrl::EndDragItems(CKanbanColumnCtrl* pSrcCol, const CDWordArray& aT
 		// Remove from the source list(s) if moving
 		if (bSrcIsBacklog)
 		{
-			bSrcChanged |= pSrcCol->DeleteTask(dwTaskID);
+			bSrcChanged |= pSrcCol->RemoveTask(dwTaskID);
 			ASSERT(bSrcChanged);
 		}
 		else if (!bCopy) // move
@@ -3575,7 +3611,7 @@ BOOL CKanbanCtrl::EndDragItems(CKanbanColumnCtrl* pSrcCol, const CDWordArray& aT
 			while (nVal--)
 				pKI->RemoveTrackedAttributeValue(m_sTrackAttribID, aSrcValues[nVal]);
 
-			bSrcChanged |= pSrcCol->DeleteTask(dwTaskID);
+			bSrcChanged |= pSrcCol->RemoveTask(dwTaskID);
 			ASSERT(bSrcChanged);
 		}
 
