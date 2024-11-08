@@ -904,9 +904,6 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments)
 
 	m_ctrlAttributes.SetSelectedTaskIDs(aSelTaskIDs);
 
-	// update data controls excluding comments
-	UpdateData(FALSE);
-
 	// and task header
 	UpdateSelectedTaskPath();
 	
@@ -994,7 +991,6 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttribID, DWORD dwFlags)
 	
 	// else
 	CSaveFocus sf;
-	UpdateData();
 	
 	switch (nAttribID)
 	{
@@ -9924,11 +9920,6 @@ BOOL CToDoCtrl::UndoLastAction(BOOL bUndo)
 			}
 			
 			// update current selection
-			m_taskTree.CacheSelection(cache);
-
-			m_ctrlAttributes.SetSelectedTaskIDs(cache.aSelTaskIDs);
-			m_ctrlAttributes.RefreshSelectedTasksValues();
-
 			UpdateControls();
 
 			// If the operation just un/redone was an edit then we treat it as such
