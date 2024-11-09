@@ -166,7 +166,7 @@ public:
 	void SetDefaultAutoListData(const TDCAUTOLISTDATA& tld);
 	void SetAutoListContentReadOnly(TDC_ATTRIBUTE nListAttribID, BOOL bReadOnly = TRUE);
 
-	BOOL CreateNewTask(const CString& sText, TDC_INSERTWHERE nWhere, BOOL bEditText = TRUE, DWORD dwDependency = 0);
+	BOOL CreateNewTask(const CString& sText, TDC_INSERTWHERE nWhere, BOOL bEditLabel = TRUE, DWORD dwDependency = 0);
 	BOOL CanCreateNewTask(TDC_INSERTWHERE nInsertWhere) const;
 	BOOL CanCreateNewTask(TDC_INSERTWHERE nWhere, const CString& sText) const;
 

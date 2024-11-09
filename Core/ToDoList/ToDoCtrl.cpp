@@ -3126,7 +3126,7 @@ BOOL CToDoCtrl::GotoSelectedTaskFileLink(int nFile)
 	return FALSE;
 }
 
-BOOL CToDoCtrl::CreateNewTask(const CString& sText, TDC_INSERTWHERE nWhere, BOOL bEditText, DWORD dwDependency)
+BOOL CToDoCtrl::CreateNewTask(const CString& sText, TDC_INSERTWHERE nWhere, BOOL bEditLabel, DWORD dwDependency)
 {
 	if (!CanCreateNewTask(nWhere, sText))
 		return FALSE;
@@ -3141,7 +3141,7 @@ BOOL CToDoCtrl::CreateNewTask(const CString& sText, TDC_INSERTWHERE nWhere, BOOL
 
 	if (m_taskTree.GetInsertLocation(nWhere, htiParent, htiAfter))
 	{
-		HTREEITEM htiNew = InsertNewTask(sText, htiParent, htiAfter, bEditText, dwDependency);
+		HTREEITEM htiNew = InsertNewTask(sText, htiParent, htiAfter, bEditLabel, dwDependency);
 		ASSERT(htiNew);
 
 		DWORD dwTaskID = GetTaskID(htiNew);
@@ -3235,7 +3235,7 @@ TODOITEM* CToDoCtrl::CreateNewTask(HTREEITEM htiParent)
 }
 
 HTREEITEM CToDoCtrl::InsertNewTask(const CString& sText, HTREEITEM htiParent, HTREEITEM htiAfter, 
-								BOOL bEdit, DWORD dwDependency)
+									BOOL bEditLabel, DWORD dwDependency)
 {
 	m_dwLastAddedID = 0;
 	
@@ -3299,7 +3299,7 @@ HTREEITEM CToDoCtrl::InsertNewTask(const CString& sText, HTREEITEM htiParent, HT
 
 			// if the parent was marked as done and the new task 
 			// is NOT cancellable, we mark the parent as incomplete.
-			if (!bEdit && m_data.IsTaskDone(dwParentID))
+			if (!bEditLabel && m_data.IsTaskDone(dwParentID))
 				FixupParentCompletion(dwParentID);
 		}
 		
@@ -3317,7 +3317,7 @@ HTREEITEM CToDoCtrl::InsertNewTask(const CString& sText, HTREEITEM htiParent, HT
 
 		m_taskTree.InvalidateAll();
 
-		if (bEdit)
+		if (bEditLabel)
 			EditSelectedTaskTitle(TRUE);
 		else
 			SetFocusToTasks();
