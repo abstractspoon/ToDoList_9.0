@@ -999,32 +999,33 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttribID, DWORD dwFlags)
 		break;
 
 	case TDCA_DONEDATE:
-		{
-			COleDateTime date = m_ctrlAttributes.GetDoneDate();
-			
-			if (SetSelectedTaskDate(TDCD_DONE, date, TRUE))
-				m_ctrlAttributes.RefreshSelectedTasksValues();
-		}
+ 		SetSelectedTaskDate(TDCD_DONETIME, m_ctrlAttributes.GetDoneDate()/*, TRUE*/);
+// 		{
+// 			COleDateTime date = m_ctrlAttributes.GetDoneDate();
+// 			
+// 			if (SetSelectedTaskDate(TDCD_DONE, date, TRUE))
+// 				m_ctrlAttributes.RefreshSelectedTasksValues();
+// 		}
 		break;
 		
 	case TDCA_DONETIME:
- 		SetSelectedTaskDate(TDCD_DONETIME, m_ctrlAttributes.GetDoneTime(), TRUE);
+ 		SetSelectedTaskDate(TDCD_DONETIME, m_ctrlAttributes.GetDoneTime()/*, TRUE*/);
 		break;
 		
 	case TDCA_STARTDATE:
-		SetSelectedTaskDate(TDCD_STARTDATE, m_ctrlAttributes.GetStartDate(), TRUE);
+		SetSelectedTaskDate(TDCD_STARTDATE, m_ctrlAttributes.GetStartDate()/*, TRUE*/);
 		break;
 		
 	case TDCA_STARTTIME:
-		SetSelectedTaskDate(TDCD_STARTTIME, m_ctrlAttributes.GetStartTime(), TRUE);
+		SetSelectedTaskDate(TDCD_STARTTIME, m_ctrlAttributes.GetStartTime()/*, TRUE*/);
 		break;
 		
 	case TDCA_DUEDATE:
-		SetSelectedTaskDate(TDCD_DUEDATE, m_ctrlAttributes.GetDueDate(), TRUE);
+		SetSelectedTaskDate(TDCD_DUEDATE, m_ctrlAttributes.GetDueDate()/*, TRUE*/);
 		break;
 		
 	case TDCA_DUETIME:
-		SetSelectedTaskDate(TDCD_DUETIME, m_ctrlAttributes.GetDueTime(), TRUE);
+		SetSelectedTaskDate(TDCD_DUETIME, m_ctrlAttributes.GetDueTime()/*, TRUE*/);
 		break;
 		
 	case TDCA_COST:
@@ -1054,7 +1055,7 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttribID, DWORD dwFlags)
 			CTDCDependencyArray aDepends;
 			m_ctrlAttributes.GetDependencies(aDepends);
 
-			SetSelectedTaskDependencies(aDepends, FALSE, TRUE);
+			SetSelectedTaskDependencies(aDepends/*, FALSE*//*, TRUE*/);
 		}
 		break;
 		
@@ -1144,7 +1145,7 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttribID, DWORD dwFlags)
 
 			BOOL bAppend = (GetSelectedTaskCount() > 1);
 
-			SetSelectedTaskFileLinks(aFiles, bAppend, TRUE);
+			SetSelectedTaskFileLinks(aFiles, bAppend/*, TRUE*/);
 		}
 		break;
 		
@@ -1697,22 +1698,22 @@ BOOL CToDoCtrl::IncrementSelectedTaskPriority(BOOL bUp)
 // external version
 BOOL CToDoCtrl::SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date)
 {
-	return SetSelectedTaskDate(nDate, date, FALSE);
-}
-
-// internal version
-BOOL CToDoCtrl::SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date, BOOL bDateEdited)
-{
-	// if this is a start/due edit then it must be a component 
-	if (bDateEdited && ((nDate == TDCD_DUE) || (nDate == TDCD_START)))
-	{
-		ASSERT(0);
-		return FALSE;
-	}
+// 	return SetSelectedTaskDate(nDate, date, FALSE);
+// }
+// 
+// // internal version
+// BOOL CToDoCtrl::SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date, BOOL bDateEdited)
+// {
+	// if this is a start/due edit then it must be an individual date/time component 
+// 	if (bDateEdited && ((nDate == TDCD_DUE) || (nDate == TDCD_START)))
+// 	{
+// 		ASSERT(0);
+// 		return FALSE;
+// 	}
 
 	// special case
 	if (nDate == TDCD_DONE)
-		return SetSelectedTaskCompletion(date, bDateEdited);
+		return SetSelectedTaskCompletion(date/*, bDateEdited*/);
 
 	TDC_ATTRIBUTE nAttribID = TDC::MapDateToAttribute(nDate);
 
@@ -1733,7 +1734,7 @@ BOOL CToDoCtrl::SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date, BO
 	if (!aModTaskIDs.GetSize())
 		return FALSE;
 
-	BOOL bUpdateTimeEst = FALSE;
+//	BOOL bUpdateTimeEst = FALSE;
 
 	switch (nDate)
 	{
@@ -1744,19 +1745,19 @@ BOOL CToDoCtrl::SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date, BO
 	case TDCD_START:
 	case TDCD_STARTDATE:
 	case TDCD_STARTTIME:
-		{
-			bUpdateTimeEst = HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES);
+// 		{
+//			bUpdateTimeEst = HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES);
 			SetModified(TDCA_STARTDATE, aModTaskIDs);
-		}
+// 		}
 		break;
 
 	case TDCD_DUE:
 	case TDCD_DUEDATE:
 	case TDCD_DUETIME:
-		{
-			bUpdateTimeEst = HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES);
+// 		{
+	//		bUpdateTimeEst = HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES);
 			SetModified(TDCA_DUEDATE, aModTaskIDs);
-		}
+// 		}
 		break;
 
 	case TDCD_DONETIME:
@@ -1770,14 +1771,14 @@ BOOL CToDoCtrl::SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date, BO
 	}
 
 	// only update controls if the date was changed implicitly
-	if (!bDateEdited)
-	{
-		UpdateControls(FALSE); // don't update comments
-	}
-	else if (bUpdateTimeEst)
-	{
-		m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_TIMEESTIMATE);
-	}
+// 	if (!bDateEdited)
+// 	{
+// 		UpdateControls(FALSE); // don't update comments
+// 	}
+// 	else if (bUpdateTimeEst)
+// 	{
+// 		m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_TIMEESTIMATE);
+// 	}
 	
 	return TRUE;
 }
@@ -2049,7 +2050,7 @@ BOOL CToDoCtrl::CheckWantTaskSubtasksCompleted(const CDWordArray& aTaskIDs) cons
 BOOL CToDoCtrl::SetSelectedTaskCompletion(TDC_TASKCOMPLETION nCompletion)
 {
 	if (nCompletion == TDCTC_UNDONE)
-		return SetSelectedTaskCompletion(CDateHelper::NullDate(), FALSE);
+		return SetSelectedTaskCompletion(CDateHelper::NullDate()/*, FALSE*/);
 
 	CDWordArray aTaskIDs;
 	DWORD dwUnused;
@@ -2089,7 +2090,7 @@ BOOL CToDoCtrl::SetSelectedTaskCompletion(TDC_TASKCOMPLETION nCompletion)
 	return TRUE;
 }
 
-BOOL CToDoCtrl::SetSelectedTaskCompletion(const COleDateTime& date, BOOL bDateEdited)
+BOOL CToDoCtrl::SetSelectedTaskCompletion(const COleDateTime& date/*, BOOL bDateEdited*/)
 {
 	Flush();
 
@@ -2107,8 +2108,8 @@ BOOL CToDoCtrl::SetSelectedTaskCompletion(const COleDateTime& date, BOOL bDateEd
 	if (!SetSelectedTaskCompletion(aTasks))
 		return FALSE;
 
-	if (!bDateEdited || aTasks.HasStateChange())
-		UpdateControls(FALSE);
+// 	if (!bDateEdited || aTasks.HasStateChange())
+// 		UpdateControls(FALSE);
 
 	return TRUE;
 }
@@ -2872,18 +2873,18 @@ BOOL CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttribID, const CStringArray
 {
 	CDWordArray aModTaskIDs;
 
-	if (SET_CHANGE != SetSelectedTaskArray(nAttribID, aItems, bAppend, aModTaskIDs))
-		return FALSE;
-
-	ASSERT(aModTaskIDs.GetSize());
-	m_ctrlAttributes.RefreshSelectedTasksValue(nAttribID);
-
-	return TRUE;
-}
-
-TDC_SET CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttribID, const CStringArray& aItems, 
-										BOOL bAppend, CDWordArray& aModTaskIDs)
-{
+// 	if (SET_CHANGE != SetSelectedTaskArray(nAttribID, aItems, bAppend, aModTaskIDs))
+// 		return FALSE;
+// 
+// 	ASSERT(aModTaskIDs.GetSize());
+// 	m_ctrlAttributes.RefreshSelectedTasksValue(nAttribID);
+// 
+// 	return TRUE;
+// }
+// 
+// TDC_SET CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttribID, const CStringArray& aItems, 
+// 										BOOL bAppend, CDWordArray& aModTaskIDs)
+// {
 	if (!CanEditSelectedTask(nAttribID))
 		return SET_FAILED;
 
@@ -2965,11 +2966,11 @@ BOOL CToDoCtrl::SetSelectedTaskTags(const CStringArray& aTags, BOOL bAppend)
 
 BOOL CToDoCtrl::SetSelectedTaskFileLinks(const CStringArray& aFilePaths, BOOL bAppend)
 {
-	return SetSelectedTaskFileLinks(aFilePaths, bAppend, FALSE);
-}
-
-BOOL CToDoCtrl::SetSelectedTaskFileLinks(const CStringArray& aFilePaths, BOOL bAppend, BOOL bCtrlEdited)
-{
+// 	return SetSelectedTaskFileLinks(aFilePaths, bAppend, FALSE);
+// }
+// 
+// BOOL CToDoCtrl::SetSelectedTaskFileLinks(const CStringArray& aFilePaths, BOOL bAppend, BOOL bCtrlEdited)
+// {
 	CStringArray aFileLinks;
 
 	if (bAppend)
@@ -2980,9 +2981,9 @@ BOOL CToDoCtrl::SetSelectedTaskFileLinks(const CStringArray& aFilePaths, BOOL bA
 	// convert to relative paths
 	MakeRelativePaths(aFileLinks);
 
-	CDWordArray aModTaskIDs;
+	//CDWordArray aModTaskIDs;
 
-	if (SET_CHANGE != SetSelectedTaskArray(TDCA_FILELINK, aFileLinks, bAppend, aModTaskIDs))
+	if (/*SET_CHANGE != */!SetSelectedTaskArray(TDCA_FILELINK, aFileLinks, bAppend/*, aModTaskIDs*/))
 		return FALSE;
 	
 	m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_FILELINK);
@@ -2991,11 +2992,11 @@ BOOL CToDoCtrl::SetSelectedTaskFileLinks(const CStringArray& aFilePaths, BOOL bA
 
 BOOL CToDoCtrl::SetSelectedTaskDependencies(const CTDCDependencyArray& aDepends, BOOL bAppend)
 {
-	return SetSelectedTaskDependencies(aDepends, bAppend, FALSE);
-}
-
-BOOL CToDoCtrl::SetSelectedTaskDependencies(const CTDCDependencyArray& aDepends, BOOL bAppend, BOOL bEdit)
-{
+// 	return SetSelectedTaskDependencies(aDepends, bAppend, FALSE);
+// }
+// 
+// BOOL CToDoCtrl::SetSelectedTaskDependencies(const CTDCDependencyArray& aDepends, BOOL bAppend, BOOL bEdit)
+// {
 	if (!CanEditSelectedTask(TDCA_DEPENDENCY))
 		return SET_FAILED;
 
@@ -8416,7 +8417,7 @@ LRESULT CToDoCtrl::OnDropObject(WPARAM wParam, LPARAM lParam)
 			}
 			else
 			{
-				SetSelectedTaskFileLinks(aFiles, TRUE, FALSE);
+				SetSelectedTaskFileLinks(aFiles, TRUE/*, FALSE*/);
 			}
 		}
 		else if (pData->HasText())
