@@ -1267,16 +1267,11 @@ BOOL CToDoCtrl::EditSelectedTaskColor()
 	CPreferences prefs;
 	dialog.LoadPreferences(prefs);
 
-	if (dialog.DoModal() == IDOK)
-	{
-		dialog.SavePreferences(prefs);
-		
-		if (SetSelectedTaskColor(dialog.GetColor()))
-			m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_COLOR);
-	}
+	if (dialog.DoModal() != IDOK)
+		return FALSE;
 
-	// else
-	return FALSE;
+	dialog.SavePreferences(prefs);
+	return SetSelectedTaskColor(dialog.GetColor());
 }
 
 BOOL CToDoCtrl::SetSelectedTaskColor(COLORREF color)
@@ -1580,9 +1575,6 @@ BOOL CToDoCtrl::SetSelectedTaskPriority(int nPriority, BOOL bOffset)
 	
 	if (!aModTaskIDs.GetSize())
 		return FALSE;
-
-	if (bOffset)
-		m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_PRIORITY);
 		
 	SetModified(TDCA_PRIORITY, aModTaskIDs);
 	return TRUE;
@@ -1617,9 +1609,6 @@ BOOL CToDoCtrl::SetSelectedTaskRisk(int nRisk, BOOL bOffset)
 	
 	if (!aModTaskIDs.GetSize())
 		return FALSE;
-
-	if (bOffset)
-		m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_RISK);
 		
 	SetModified(TDCA_RISK, aModTaskIDs);
 	return TRUE;
@@ -2035,13 +2024,7 @@ BOOL CToDoCtrl::SetSelectedTaskCompletion(TDC_TASKCOMPLETION nCompletion)
 		ASSERT(aTaskIDs.GetSize());
 	}
 
-	if (!SetSelectedTaskCompletion(aTasks))
-		return FALSE;
-
-	if (aTasks.HasStateChange())
-		UpdateControls(FALSE);
-
-	return TRUE;
+	return SetSelectedTaskCompletion(aTasks);
 }
 
 BOOL CToDoCtrl::SetSelectedTaskCompletion(const COleDateTime& date)
@@ -2526,32 +2509,11 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimate(const TDCTIMEPERIOD& timeEst, BOOL b
 		if (bOffset)
 			mapProcessed.Add(dwTaskID);
 	}
-	
-	if (aModTaskIDs.GetSize())
-	{
-		// Update the time estimate field
-		m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_TIMEESTIMATE);
 
-		// Recalc other attributes if only one item selected
- 		if (GetSelectedTaskCount() == 1)
-		{
-			// update % complete?
-			if (HasStyle(TDCS_AUTOCALCPERCENTDONE))
-			{
-				m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_PERCENT);
-			}
+	if (!aModTaskIDs.GetSize())
+		return FALSE;
 
-			// update start/due date?
-			if (HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES))
-			{
-				m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_STARTDATE);
-				m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_DUEDATE);
-			}
-		}
-
-		SetModified(TDCA_TIMEESTIMATE, aModTaskIDs);
-	}
-
+	SetModified(TDCA_TIMEESTIMATE, aModTaskIDs);
 	return TRUE;
 }
 
@@ -2589,20 +2551,10 @@ BOOL CToDoCtrl::SetSelectedTaskTimeSpent(const TDCTIMEPERIOD& timeSpent, BOOL bO
 			mapProcessed.Add(dwTaskID);
 	}
 	
-	if (aModTaskIDs.GetSize())
-	{
-		// Update the time spent field
-		m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_TIMEESTIMATE);
-		
-		// update % complete?
-		if (HasStyle(TDCS_AUTOCALCPERCENTDONE) && (GetSelectedTaskCount() == 1))
-		{
-			m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_PERCENT);
-		}
-		
-		SetModified(TDCA_TIMESPENT, aModTaskIDs);
-	}
+	if (!aModTaskIDs.GetSize())
+		return FALSE;
 	
+	SetModified(TDCA_TIMESPENT, aModTaskIDs);
 	return TRUE;
 }
 
@@ -2636,23 +2588,23 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimateUnits(TDC_UNITS nUnits, BOOL bRecalcT
 	if (!aModTaskIDs.GetSize())
 		return FALSE;
 
-	m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_TIMEESTIMATE);
-
-	// update other controls if only one item selected
-	// TODO
-	if (GetSelectedTaskCount() == 1)
-	{
-		if (!bRecalcTime && HasStyle(TDCS_AUTOCALCPERCENTDONE))
-		{
-			m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_PERCENT);
-		}
-
-		// update due date?
-		if (HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES))
-		{
-			m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_DUEDATE);
-		}
-	}
+// 	m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_TIMEESTIMATE);
+// 
+// 	// update other controls if only one item selected
+// 	// TODO
+// 	if (GetSelectedTaskCount() == 1)
+// 	{
+// 		if (!bRecalcTime && HasStyle(TDCS_AUTOCALCPERCENTDONE))
+// 		{
+// 			m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_PERCENT);
+// 		}
+// 
+// 		// update due date?
+// 		if (HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES))
+// 		{
+// 			m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_DUEDATE);
+// 		}
+// 	}
 
 	SetModified(TDCA_TIMEESTIMATE, aModTaskIDs);
 	return TRUE;
@@ -2688,17 +2640,17 @@ BOOL CToDoCtrl::SetSelectedTaskTimeSpentUnits(TDC_UNITS nUnits, BOOL bRecalcTime
 	if (!aModTaskIDs.GetSize())
 		return FALSE;
 
-	m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_TIMESPENT);
-
-	// update controls if only one item selected
-	if (GetSelectedTaskCount() == 1)
-	{
-		// update % complete?
-		if (!bRecalcTime && HasStyle(TDCS_AUTOCALCPERCENTDONE))
-		{
-			m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_PERCENT);
-		}
-	}
+// 	m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_TIMESPENT);
+// 
+// 	// update controls if only one item selected
+// 	if (GetSelectedTaskCount() == 1)
+// 	{
+// 		// update % complete?
+// 		if (!bRecalcTime && HasStyle(TDCS_AUTOCALCPERCENTDONE))
+// 		{
+// 			m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_PERCENT);
+// 		}
+// 	}
 
 	SetModified(TDCA_TIMESPENT, aModTaskIDs);
 	return TRUE;
@@ -2794,23 +2746,16 @@ BOOL CToDoCtrl::SetSelectedTaskStatus(const CString& sStatus)
 		DWORD dwTaskID = TSH().GetNextItemData(pos);
 
 		if (!aTasksForCompletion.Add(dwTaskID, sStatus))
+		{
+			// regular status change
 			HandleModResult(dwTaskID, m_data.SetTaskStatus(dwTaskID, sStatus), aModTaskIDs);
+		}
 	}
 
 	if (aTasksForCompletion.GetSize())
-	{
-		if (!SetSelectedTaskCompletion(aTasksForCompletion))
-			return FALSE;
+		return SetSelectedTaskCompletion(aTasksForCompletion);
 
-		// else
-		m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_DONEDATE);
-
-		aTasksForCompletion.GetTaskIDs(aModTaskIDs, TRUE);
-		SetModified(TDCA_DONEDATE, aModTaskIDs);
-
-		return TRUE;
-	}
-
+	// else regular status change
 	if (!aModTaskIDs.GetSize())
 		return FALSE;
 
@@ -2907,15 +2852,9 @@ BOOL CToDoCtrl::SetSelectedTaskFileLinks(const CStringArray& aFilePaths, BOOL bA
 		GetSelectedTaskFileLinks(aFileLinks); // full paths
 
 	Misc::AddUniqueItems(aFilePaths, aFileLinks);
-
-	// convert to relative paths
 	MakeRelativePaths(aFileLinks);
 
-	if (!SetSelectedTaskArray(TDCA_FILELINK, aFileLinks, bAppend))
-		return FALSE;
-	
-	m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_FILELINK);
-	return TRUE;
+	return SetSelectedTaskArray(TDCA_FILELINK, aFileLinks, bAppend);
 }
 
 BOOL CToDoCtrl::SetSelectedTaskDependencies(const CTDCDependencyArray& aDepends, BOOL bAppend)
@@ -2938,16 +2877,6 @@ BOOL CToDoCtrl::SetSelectedTaskDependencies(const CTDCDependencyArray& aDepends,
 
 	if (!aModTaskIDs.GetSize())
 		return FALSE;
-
-	// TODO
-	if (aModTaskIDs.GetSize())
-	{
-		// Start and due dates might also have changed
-		if (HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES))
-		{
-			m_ctrlAttributes.RefreshSelectedTasksValues();
-		}
-	}
 
 	SetModified(TDCA_DEPENDENCY, aModTaskIDs);
 	return TRUE;
@@ -9258,11 +9187,7 @@ BOOL CToDoCtrl::EditSelectedTaskDependency()
 			CTDCDependencyArray aDepends;
 			dialog.GetDependencies(aDepends);
 
-			if (SetSelectedTaskDependencies(aDepends))
-			{
-				m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_DEPENDENCY);
-				return TRUE;
-			}
+			return SetSelectedTaskDependencies(aDepends);
 		}
 	}
 
@@ -9291,11 +9216,7 @@ BOOL CToDoCtrl::EditSelectedTaskRecurrence()
 			TDCRECURRENCE trNew;
 			dialog.GetRecurrenceOptions(trNew);
 
-			if (SetSelectedTaskRecurrence(trNew))
-			{
-				m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_RECURRENCE);
-				return TRUE;
-			}
+			return SetSelectedTaskRecurrence(trNew);
 		}
 	}
 
