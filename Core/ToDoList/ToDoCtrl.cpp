@@ -2588,24 +2588,6 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimateUnits(TDC_UNITS nUnits, BOOL bRecalcT
 	if (!aModTaskIDs.GetSize())
 		return FALSE;
 
-// 	m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_TIMEESTIMATE);
-// 
-// 	// update other controls if only one item selected
-// 	// TODO
-// 	if (GetSelectedTaskCount() == 1)
-// 	{
-// 		if (!bRecalcTime && HasStyle(TDCS_AUTOCALCPERCENTDONE))
-// 		{
-// 			m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_PERCENT);
-// 		}
-// 
-// 		// update due date?
-// 		if (HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES))
-// 		{
-// 			m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_DUEDATE);
-// 		}
-// 	}
-
 	SetModified(TDCA_TIMEESTIMATE, aModTaskIDs);
 	return TRUE;
 }
@@ -2639,18 +2621,6 @@ BOOL CToDoCtrl::SetSelectedTaskTimeSpentUnits(TDC_UNITS nUnits, BOOL bRecalcTime
 	
 	if (!aModTaskIDs.GetSize())
 		return FALSE;
-
-// 	m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_TIMESPENT);
-// 
-// 	// update controls if only one item selected
-// 	if (GetSelectedTaskCount() == 1)
-// 	{
-// 		// update % complete?
-// 		if (!bRecalcTime && HasStyle(TDCS_AUTOCALCPERCENTDONE))
-// 		{
-// 			m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_PERCENT);
-// 		}
-// 	}
 
 	SetModified(TDCA_TIMESPENT, aModTaskIDs);
 	return TRUE;
