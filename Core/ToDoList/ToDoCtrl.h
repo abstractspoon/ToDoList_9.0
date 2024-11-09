@@ -699,7 +699,7 @@ protected:
 
 	// -------------------------------------------------------------------------------
 	
-	void UpdateTask(TDC_ATTRIBUTE nAttribID, DWORD dwFlags = 0);
+	BOOL UpdateTask(TDC_ATTRIBUTE nAttribID, DWORD dwFlags = 0);
 	void UpdateControls(BOOL bIncComments = TRUE);
 	void IncrementTrackedTime(BOOL bEnding);
 	BOOL FindReplaceSelectedTaskAttribute(BOOL bReplacingAllTasks);
