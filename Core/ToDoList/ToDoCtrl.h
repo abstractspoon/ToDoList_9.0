@@ -706,8 +706,8 @@ protected:
 
 	// internal versions so we can tell how we've been called
 	BOOL SetSelectedTaskComments(const CString& sComments, const CBinaryData& customComments, BOOL bInternal);
-	BOOL SetSelectedTaskTimeEstimateUnits(TDC_UNITS nUnits, BOOL bRecalcTime);
-	BOOL SetSelectedTaskTimeSpentUnits(TDC_UNITS nUnits, BOOL bRecalcTime);
+	BOOL SetSelectedTaskTimeEstimate(const TDCTIMEPERIOD& timeEst, BOOL bOffset, BOOL bRecalcTime);
+	BOOL SetSelectedTaskTimeSpent(const TDCTIMEPERIOD& timeSpent, BOOL bOffset, BOOL bRecalcTime);
 	HTREEITEM InsertNewTask(const CString& sText, HTREEITEM htiParent, HTREEITEM htiAfter, BOOL bEditLabel, DWORD dwDependency);
 	BOOL SetSelectedTaskPercentDone(int nPercent, BOOL bOffset, const COleDateTime& date);
 	BOOL SetSelectedTaskColor(COLORREF color);
@@ -815,7 +815,7 @@ protected:
 	void FixupParentCompletion(DWORD dwParentID);
 
 	// used for building/creating the tree for saving/loading
-	// not for overriding
+	// NOT FOR OVERRIDING
 	int GetAllTasks(CTaskFile& tasks) const;
 	HTREEITEM SetAllTasks(const CTaskFile& tasks);
 

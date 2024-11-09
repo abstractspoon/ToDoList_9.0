@@ -128,8 +128,7 @@ enum
 
 enum // flags for UpdateTask
 {
-	UTF_TIMEUNITSONLY	= 0x01,
-	UTF_RECALCTIME		= 0x02,	
+	UTF_RECALCTIME		= 0x01,	
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1105,10 +1104,7 @@ BOOL CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttribID, DWORD dwFlags)
 			TDCTIMEPERIOD tp;
 			m_ctrlAttributes.GetTimeEstimate(tp);
 
-			if (dwFlags & UTF_TIMEUNITSONLY)
-				bChange = SetSelectedTaskTimeEstimateUnits(tp.nUnits, Misc::HasFlag(dwFlags, UTF_RECALCTIME));
-			else
-				bChange = SetSelectedTaskTimeEstimate(tp);
+			bChange = SetSelectedTaskTimeEstimate(tp, FALSE, Misc::HasFlag(dwFlags, UTF_RECALCTIME));
 		}
 		break;
 		
@@ -1117,10 +1113,7 @@ BOOL CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttribID, DWORD dwFlags)
 			TDCTIMEPERIOD tp;
 			m_ctrlAttributes.GetTimeSpent(tp);
 
-			if (dwFlags & UTF_TIMEUNITSONLY)
-				bChange = SetSelectedTaskTimeSpentUnits(tp.nUnits, Misc::HasFlag(dwFlags, UTF_RECALCTIME));
-			else
-				bChange = SetSelectedTaskTimeSpent(tp);
+			bChange = SetSelectedTaskTimeSpent(tp, FALSE, Misc::HasFlag(dwFlags, UTF_RECALCTIME));
 		}
 		break;
 		
@@ -2283,11 +2276,6 @@ void CToDoCtrl::InitialiseNewRecurringTask(DWORD dwPrevTaskID, DWORD dwNewTaskID
 	}
 }
 
-BOOL CToDoCtrl::SetSelectedTaskPercentDone(int nPercent, BOOL bOffset)
-{
-	return SetSelectedTaskPercentDone(nPercent, bOffset, CDateHelper::NullDate());
-}
-
 BOOL CToDoCtrl::CanSetSelectedTaskPercentDone(BOOL bToToday) const
 {
 	if (!CanEditSelectedTask(TDCA_PERCENT))
@@ -2319,7 +2307,13 @@ BOOL CToDoCtrl::SetSelectedTaskPercentDoneToToday()
 	return SetSelectedTaskPercentDone(-1, FALSE, CDateHelper::GetEndOfDay(COleDateTime::GetCurrentTime()));
 }
 
-// internal helper
+// External
+BOOL CToDoCtrl::SetSelectedTaskPercentDone(int nPercent, BOOL bOffset)
+{
+	return SetSelectedTaskPercentDone(nPercent, bOffset, CDateHelper::NullDate());
+}
+
+// Internal
 BOOL CToDoCtrl::SetSelectedTaskPercentDone(int nPercent, BOOL bOffset, const COleDateTime& date)
 {
 	// Sanity check
@@ -2349,7 +2343,7 @@ BOOL CToDoCtrl::SetSelectedTaskPercentDone(int nPercent, BOOL bOffset, const COl
 	{
 		DWORD dwTaskID = TSH().GetNextItemData(pos);
 
-		if (bOffset && mapProcessed.Has(dwTaskID))
+		if (mapProcessed.Has(dwTaskID))
 			continue;
 
 		int nTaskPercent = nPercent;
@@ -2375,8 +2369,7 @@ BOOL CToDoCtrl::SetSelectedTaskPercentDone(int nPercent, BOOL bOffset, const COl
 		if (!aTasksForCompletion.Add(dwTaskID, nTaskPercent))
 			HandleModResult(dwTaskID, m_data.SetTaskPercent(dwTaskID, nTaskPercent), aModTaskIDs);
 
-		if (bOffset)
-			mapProcessed.Add(dwTaskID);
+		mapProcessed.Add(dwTaskID);
 	}
 
 	if (aTasksForCompletion.GetSize())
@@ -2417,13 +2410,11 @@ BOOL CToDoCtrl::SetSelectedTaskCost(const TDCCOST& cost, BOOL bOffset)
 	{
 		DWORD dwTaskID = TSH().GetNextItemData(pos);
 
-		if (bOffset && mapProcessed.Has(dwTaskID))
+		if (mapProcessed.Has(dwTaskID))
 			continue;
 
 		HandleModResult(dwTaskID, m_data.SetTaskCost(dwTaskID, cost, bOffset), aModTaskIDs);
-
-		if (bOffset)
-			mapProcessed.Add(dwTaskID);
+		mapProcessed.Add(dwTaskID);
 	}
 
 	if (!aModTaskIDs.GetSize())
@@ -2479,8 +2470,15 @@ BOOL CToDoCtrl::IncrementSelectedTaskPercentDone(BOOL bUp)
 	return SetSelectedTaskPercentDone((bUp ? m_nPercentIncrement : -m_nPercentIncrement), TRUE);
 }
 
+// External
 BOOL CToDoCtrl::SetSelectedTaskTimeEstimate(const TDCTIMEPERIOD& timeEst, BOOL bOffset)
 {
+	return SetSelectedTaskTimeEstimate(timeEst, bOffset, FALSE);
+}
+
+// Internal
+BOOL CToDoCtrl::SetSelectedTaskTimeEstimate(const TDCTIMEPERIOD& timeEst, BOOL bOffset, BOOL bRecalcTime)
+{
 	if (!CanEditSelectedTask(TDCA_TIMEESTIMATE))
 		return FALSE;
 
@@ -2499,18 +2497,29 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimate(const TDCTIMEPERIOD& timeEst, BOOL b
 	{
 		DWORD dwTaskID = TSH().GetNextItemData(pos);
 
-		if (bOffset && mapProcessed.Has(dwTaskID))
+		if (mapProcessed.Has(dwTaskID))
 			continue;
 
 		// ignore parent tasks
 		if (m_data.IsTaskParent(dwTaskID) && !HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
 			continue;
 
-		if (m_data.SetTaskTimeEstimate(dwTaskID, timeEst, bOffset) == SET_CHANGE)
-			aModTaskIDs.Add(dwTaskID);
+		if (bRecalcTime) // Just changing the units
+ 		{
+			TDCTIMEPERIOD tpCur;
+			m_data.GetTaskTimeEstimate(dwTaskID, tpCur);
 
-		if (bOffset)
-			mapProcessed.Add(dwTaskID);
+			ASSERT(tpCur.nUnits != timeEst.nUnits);
+
+			if (tpCur.SetUnits(timeEst.nUnits, TRUE))
+				HandleModResult(dwTaskID, m_data.SetTaskTimeEstimate(dwTaskID, tpCur), aModTaskIDs);
+		}
+		else // Set or Offset
+		{
+			HandleModResult(dwTaskID, m_data.SetTaskTimeEstimate(dwTaskID, timeEst, bOffset), aModTaskIDs);
+		}
+
+		mapProcessed.Add(dwTaskID);
 	}
 
 	if (!aModTaskIDs.GetSize())
@@ -2520,8 +2529,15 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimate(const TDCTIMEPERIOD& timeEst, BOOL b
 	return TRUE;
 }
 
+// External
 BOOL CToDoCtrl::SetSelectedTaskTimeSpent(const TDCTIMEPERIOD& timeSpent, BOOL bOffset)
 {
+	return SetSelectedTaskTimeSpent(timeSpent, bOffset, FALSE);
+}
+
+// Internal
+BOOL CToDoCtrl::SetSelectedTaskTimeSpent(const TDCTIMEPERIOD& timeSpent, BOOL bOffset, BOOL bRecalcTime)
+{
 	if (!CanEditSelectedTask(TDCA_TIMESPENT))
 		return FALSE;
 
@@ -2540,91 +2556,34 @@ BOOL CToDoCtrl::SetSelectedTaskTimeSpent(const TDCTIMEPERIOD& timeSpent, BOOL bO
 	{
 		DWORD dwTaskID = TSH().GetNextItemData(pos);
 
-		if (bOffset && mapProcessed.Has(dwTaskID))
+		if (mapProcessed.Has(dwTaskID))
 			continue;
 
 		// ignore parent tasks
 		if (m_data.IsTaskParent(dwTaskID) && !HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
 			continue;
 
-		if (m_data.SetTaskTimeSpent(dwTaskID, timeSpent, bOffset) == SET_CHANGE)
-			aModTaskIDs.Add(dwTaskID);
+		if (bRecalcTime) // Just changing the units
+ 		{
+			TDCTIMEPERIOD tpCur;
+			m_data.GetTaskTimeSpent(dwTaskID, tpCur);
 
-		if (bOffset)
-			mapProcessed.Add(dwTaskID);
+			ASSERT(tpCur.nUnits != timeSpent.nUnits);
+
+			if (tpCur.SetUnits(timeSpent.nUnits, TRUE))
+				HandleModResult(dwTaskID, m_data.SetTaskTimeSpent(dwTaskID, tpCur), aModTaskIDs);
+		}
+		else // Set or offset
+		{
+			HandleModResult(dwTaskID, m_data.SetTaskTimeSpent(dwTaskID, timeSpent, bOffset), aModTaskIDs);
+		}
+
+		mapProcessed.Add(dwTaskID);
 	}
 	
 	if (!aModTaskIDs.GetSize())
 		return FALSE;
 	
-	SetModified(TDCA_TIMESPENT, aModTaskIDs);
-	return TRUE;
-}
-
-BOOL CToDoCtrl::SetSelectedTaskTimeEstimateUnits(TDC_UNITS nUnits, BOOL bRecalcTime)
-{
-	if (!CanEditSelectedTask(TDCA_TIMEESTIMATE))
-		return FALSE;
-
-	Flush();
-	
-	POSITION pos = TSH().GetFirstItemPos();
-	CDWordArray aModTaskIDs;
-	
-	IMPLEMENT_DATA_UNDO_EDIT(m_data);
-		
-	while (pos)
-	{
-		DWORD dwTaskID = TSH().GetNextItemData(pos);
-
-		// ignore parent tasks
-		if (m_data.IsTaskParent(dwTaskID) && !HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
-			continue;
-
-		TDCTIMEPERIOD timeEst;
-		m_data.GetTaskTimeEstimate(dwTaskID, timeEst);
-
-		if (timeEst.SetUnits(nUnits, bRecalcTime))
-			HandleModResult(dwTaskID, m_data.SetTaskTimeEstimate(dwTaskID, timeEst), aModTaskIDs);
-	}
-	
-	if (!aModTaskIDs.GetSize())
-		return FALSE;
-
-	SetModified(TDCA_TIMEESTIMATE, aModTaskIDs);
-	return TRUE;
-}
-
-BOOL CToDoCtrl::SetSelectedTaskTimeSpentUnits(TDC_UNITS nUnits, BOOL bRecalcTime)
-{
-	if (!CanEditSelectedTask(TDCA_TIMESPENT))
-		return FALSE;
-
-	Flush();
-	
-	POSITION pos = TSH().GetFirstItemPos();
-	CDWordArray aModTaskIDs;
-	
-	IMPLEMENT_DATA_UNDO_EDIT(m_data);
-
-	while (pos)
-	{
-		DWORD dwTaskID = TSH().GetNextItemData(pos);
-
-		// ignore parent tasks
-		if (m_data.IsTaskParent(dwTaskID) && !HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
-			continue;
-
-		TDCTIMEPERIOD timeSpent;
-		m_data.GetTaskTimeSpent(dwTaskID, timeSpent);
-
-		if (timeSpent.SetUnits(nUnits, bRecalcTime))
-			HandleModResult(dwTaskID, m_data.SetTaskTimeSpent(dwTaskID, timeSpent), aModTaskIDs);
-	}
-	
-	if (!aModTaskIDs.GetSize())
-		return FALSE;
-
 	SetModified(TDCA_TIMESPENT, aModTaskIDs);
 	return TRUE;
 }
