@@ -1583,7 +1583,7 @@ BOOL CToDoCtrl::SetSelectedTaskPriority(int nPriority, BOOL bOffset)
 
 	while (pos)
 	{
-		DWORD dwTaskID = TSH().GetNextItemData(pos);
+		DWORD dwTaskID = GetTrueTaskID(TSH().GetNextItem(pos));
 
 		if (mapProcessed.Has(dwTaskID))
 			continue;
@@ -1620,7 +1620,7 @@ BOOL CToDoCtrl::SetSelectedTaskRisk(int nRisk, BOOL bOffset)
 
 	while (pos)
 	{
-		DWORD dwTaskID = TSH().GetNextItemData(pos);
+		DWORD dwTaskID = GetTrueTaskID(TSH().GetNextItem(pos));
 
 		if (mapProcessed.Has(dwTaskID))
 			continue;
@@ -2412,7 +2412,7 @@ BOOL CToDoCtrl::SetSelectedTaskPercentDone(int nPercent, BOOL bOffset, const COl
 
 	while (pos)
 	{
-		DWORD dwTaskID = TSH().GetNextItemData(pos);
+		DWORD dwTaskID = GetTrueTaskID(TSH().GetNextItem(pos));
 
 		if (bOffset && mapProcessed.Has(dwTaskID))
 			continue;
@@ -2480,7 +2480,7 @@ BOOL CToDoCtrl::SetSelectedTaskCost(const TDCCOST& cost, BOOL bOffset)
 
 	while (pos)
 	{
-		DWORD dwTaskID = TSH().GetNextItemData(pos);
+		DWORD dwTaskID = GetTrueTaskID(TSH().GetNextItem(pos));
 
 		if (bOffset && mapProcessed.Has(dwTaskID))
 			continue;
@@ -2562,7 +2562,7 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimate(const TDCTIMEPERIOD& timeEst, BOOL b
 
 	while (pos)
 	{
-		DWORD dwTaskID = TSH().GetNextItemData(pos);
+		DWORD dwTaskID = GetTrueTaskID(TSH().GetNextItem(pos));
 
 		if (bOffset && mapProcessed.Has(dwTaskID))
 			continue;
@@ -2624,7 +2624,7 @@ BOOL CToDoCtrl::SetSelectedTaskTimeSpent(const TDCTIMEPERIOD& timeSpent, BOOL bO
 
 	while (pos)
 	{
-		DWORD dwTaskID = TSH().GetNextItemData(pos);
+		DWORD dwTaskID = GetTrueTaskID(TSH().GetNextItem(pos));
 
 		if (bOffset && mapProcessed.Has(dwTaskID))
 			continue;
