@@ -2039,13 +2039,7 @@ int CTDLTaskAttributeListCtrl::GetCategories(CStringArray& aMatched, CStringArra
 
 int CTDLTaskAttributeListCtrl::GetDependencies(CTDCDependencyArray& aDepends) const
 {
-	m_eDepends.GetDependencies(aDepends);
-
-	// Handle the edit field having not been initialised
-	if ((aDepends.GetSize() == 0) && !GetValueText(TDCA_DEPENDENCY).IsEmpty())
-		m_multitasker.GetTasksDependencies(m_aSelectedTaskIDs, aDepends);
-
-	return aDepends.GetSize();
+	return m_eDepends.GetDependencies(aDepends);
 }
 
 int CTDLTaskAttributeListCtrl::GetTags(CStringArray& aMatched, CStringArray& aMixed) const
