@@ -1013,15 +1013,6 @@ BOOL CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttribID, DWORD dwFlags)
 		bChange = SetSelectedTaskDate(TDCD_DUETIME, m_ctrlAttributes.GetDueTime());
 		break;
 		
-	case TDCA_COST:
-		{
-			TDCCOST cost;
-			
-			if (m_ctrlAttributes.GetCost(cost))
-				bChange = SetSelectedTaskCost(cost);
-		}
-		break;
-		
 	case TDCA_FLAG:
 		bChange = SetSelectedTaskFlag(m_ctrlAttributes.GetFlag());
 		break;
@@ -1030,9 +1021,41 @@ BOOL CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttribID, DWORD dwFlags)
 		bChange = SetSelectedTaskLock(m_ctrlAttributes.GetLock());
 		break;
 		
-	case TDCA_RECURRENCE:
-	case TDCA_COLOR:
-		ASSERT(0);
+	case TDCA_PRIORITY:
+		bChange = SetSelectedTaskPriority(m_ctrlAttributes.GetPriority());
+		break;
+
+	case TDCA_RISK:
+		bChange = SetSelectedTaskRisk(m_ctrlAttributes.GetRisk());
+		break;
+
+	case TDCA_EXTERNALID:
+		bChange = SetSelectedTaskExternalID(m_ctrlAttributes.GetExternalID());
+		break;
+
+	case TDCA_ALLOCBY:
+		bChange = SetSelectedTaskAllocBy(m_ctrlAttributes.GetAllocBy());
+		break;
+
+	case TDCA_STATUS:
+		bChange = SetSelectedTaskStatus(m_ctrlAttributes.GetStatus());
+		break;
+
+	case TDCA_VERSION:
+		bChange = SetSelectedTaskVersion(m_ctrlAttributes.GetVersion());
+		break;
+
+	case TDCA_PERCENT:
+		bChange = SetSelectedTaskPercentDone(m_ctrlAttributes.GetPercentDone());
+		break;
+
+	case TDCA_COST:
+		{
+			TDCCOST cost;
+			
+			if (m_ctrlAttributes.GetCost(cost))
+				bChange = SetSelectedTaskCost(cost);
+		}
 		break;
 		
 	case TDCA_DEPENDENCY:
@@ -1044,30 +1067,6 @@ BOOL CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttribID, DWORD dwFlags)
 		}
 		break;
 		
-	case TDCA_PRIORITY:
-		bChange = SetSelectedTaskPriority(m_ctrlAttributes.GetPriority());
-		break;
-		
-	case TDCA_RISK:
-		bChange = SetSelectedTaskRisk(m_ctrlAttributes.GetRisk());
-		break;
-		
-	case TDCA_EXTERNALID:
-		bChange = SetSelectedTaskExternalID(m_ctrlAttributes.GetExternalID());
-		break;
-		
-	case TDCA_ALLOCBY:
-		bChange = SetSelectedTaskAllocBy(m_ctrlAttributes.GetAllocBy());
-		break;
-		
-	case TDCA_STATUS:
-		bChange = SetSelectedTaskStatus(m_ctrlAttributes.GetStatus());
-		break;
-		
-	case TDCA_VERSION:
-		bChange = SetSelectedTaskVersion(m_ctrlAttributes.GetVersion());
-		break;
-
 	case TDCA_ALLOCTO:
 		{
 			CStringArray aMatched, aMixed;
@@ -1093,10 +1092,6 @@ BOOL CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttribID, DWORD dwFlags)
 
 			bChange = SetSelectedTaskArray(TDCA_TAGS, m_tldAll.aTags, aMatched, aMixed);
 		}
-		break;
-		
-	case TDCA_PERCENT:
-		SetSelectedTaskPercentDone(m_ctrlAttributes.GetPercentDone());
 		break;
 		
 	case TDCA_TIMEESTIMATE:
@@ -1128,6 +1123,11 @@ BOOL CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttribID, DWORD dwFlags)
 		}
 		break;
 		
+	case TDCA_RECURRENCE:
+	case TDCA_COLOR:
+		ASSERT(0);
+		break;
+
 	default:
 		// handle custom attributes
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
@@ -1155,11 +1155,11 @@ BOOL CToDoCtrl::SetSelectedTaskCustomAttributeData(const CString& sAttribID, con
 
 	Flush();
 	
-	POSITION pos = TSH().GetFirstItemPos();
-	CDWordArray aModTaskIDs;
-	
 	IMPLEMENT_DATA_UNDO_EDIT(m_data);
 		
+	CDWordArray aModTaskIDs;
+	POSITION pos = TSH().GetFirstItemPos();
+	
 	while (pos)
 	{
 		DWORD dwTaskID = TSH().GetNextItemData(pos);
@@ -1330,6 +1330,9 @@ BOOL CToDoCtrl::ClearSelectedTaskIcon()
 
 BOOL CToDoCtrl::SetSelectedTaskIcon(const CString& sIcon)
 {
+	if (!CanEditSelectedTask(TDCA_ICON))
+		return FALSE;
+
 	Flush();
 	
 	IMPLEMENT_DATA_UNDO_EDIT(m_data);
@@ -1676,6 +1679,8 @@ BOOL CToDoCtrl::SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date)
 
 	if (!CanEditSelectedTask(nAttribID))
 		return FALSE;
+
+	Flush();
 
 	IMPLEMENT_DATA_UNDO_EDIT(m_data);
 		
@@ -2336,8 +2341,8 @@ BOOL CToDoCtrl::SetSelectedTaskPercentDone(int nPercent, BOOL bOffset, const COl
 	// Percent edits can cause completion changes
 	CTDCTaskCompletionArray aTasksForCompletion(m_data, m_sCompletionStatus);
 
-	POSITION pos = TSH().GetFirstItemPos();
 	CDWordArray aModTaskIDs;
+	POSITION pos = TSH().GetFirstItemPos();
 
 	while (pos)
 	{
@@ -2484,11 +2489,11 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimate(const TDCTIMEPERIOD& timeEst, BOOL b
 
 	Flush();
 	
-	POSITION pos = TSH().GetFirstItemPos();
-	CDWordArray aModTaskIDs;
-	
 	IMPLEMENT_DATA_UNDO_EDIT(m_data);
 		
+	CDWordArray aModTaskIDs;
+	POSITION pos = TSH().GetFirstItemPos();
+	
 	// Keep track of what we've processed to avoid offsetting
 	// the same task multiple times via references
 	CDWordSet mapProcessed;
@@ -2543,11 +2548,11 @@ BOOL CToDoCtrl::SetSelectedTaskTimeSpent(const TDCTIMEPERIOD& timeSpent, BOOL bO
 
 	Flush();
 	
-	POSITION pos = TSH().GetFirstItemPos();
-	CDWordArray aModTaskIDs;
-	
 	IMPLEMENT_DATA_UNDO_EDIT(m_data);
 		
+	CDWordArray aModTaskIDs;
+	POSITION pos = TSH().GetFirstItemPos();
+	
 	// Keep track of what we've processed to avoid offsetting
 	// the same task multiple times via references
 	CDWordSet mapProcessed;
@@ -2723,6 +2728,10 @@ BOOL CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttribID, const CStringArray
 BOOL CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttribID, const CStringArray& aAll, 
 									 const CStringArray& aChecked, const CStringArray& aMixed)
 {
+	Flush();
+
+	IMPLEMENT_DATA_UNDO_EDIT(m_data);
+
 	CStringArray aUnchecked, aTaskItems;
 	BOOL bMergeItems = FALSE;
 
@@ -2735,10 +2744,8 @@ BOOL CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttribID, const CStringArray
 		bMergeItems = TRUE;
 	}
 	
-	POSITION pos = TSH().GetFirstItemPos();
 	CDWordArray aModTaskIDs;
-
-	IMPLEMENT_DATA_UNDO_EDIT(m_data);
+	POSITION pos = TSH().GetFirstItemPos();
 
 	while (pos)
 	{
