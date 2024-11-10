@@ -101,6 +101,8 @@ namespace SpreadsheetContentControl
 				e.Worksheet.CellMouseMove -= new EventHandler<CellMouseEventArgs>(OnCellMouseMove);
 			};
 
+			this.SizeChanged += (s, e) => Invalidate(true);
+
 			AllowDrop = true;
 		}
 
