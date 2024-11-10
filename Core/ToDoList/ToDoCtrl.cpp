@@ -4763,7 +4763,6 @@ BOOL CToDoCtrl::ArchiveDoneTasks(TDC_ARCHIVE nRemove, BOOL bRemoveFlagged)
 	CacheTreeSelection(cache);
 	
 	RemoveArchivedTasks(xiDone, nRemove, bRemoveFlagged);
-
 	RestoreTreeSelection(cache);
 
 	return TRUE;
@@ -5381,9 +5380,7 @@ BOOL CToDoCtrl::CanDropSelectedTasks(DD_DROPEFFECT nDrop, HTREEITEM htiDropTarge
 BOOL CToDoCtrl::DropSelectedTasks(DD_DROPEFFECT nDrop, HTREEITEM htiDropTarget, HTREEITEM htiDropAfter)
 {
 	if (!CanDropSelectedTasks(nDrop, htiDropTarget))
-	{
 		return FALSE;
-	}
 
 	CLockUpdates lu(*this);
 
@@ -6698,7 +6695,6 @@ LRESULT CToDoCtrl::OnTDCNotifyTaskAttributeEdited(WPARAM wParam, LPARAM lParam)
 	case TDCA_TIMESPENT:
 		if (lParam && (GetSelectedTaskCount() == 1)) // Time units change only
 		{
-			int nRecalcTime = IDNO;
 			TDCTIMEPERIOD time;
 
 			// see if the current time is non-zero and if so we prompt
@@ -6765,6 +6761,7 @@ LRESULT CToDoCtrl::OnTDCEditTaskAttribute(WPARAM wParam, LPARAM lParam)
 				break;
 			}
 		}
+		break;
 	}
 
 	// All else
