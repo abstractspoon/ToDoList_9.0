@@ -37,9 +37,15 @@ namespace unvell.ReoGrid.Editor
 	{
 		public bool FocusToGridAfterInputValue { get; set; }
 
+		private int MinHeight = -1;
+		private bool dragging = false;
+		private int lastYDrag;
+
 		public FormulaBarControl()
 		{
 			InitializeComponent();
+
+			MinHeight = (addressField.Height + (this.Height - txtFormula.Height));
 
 			txtFormula.KeyDown += txtFormula_KeyDown;
 			txtFormula.GotFocus += txtFormula_GotFocus;
@@ -77,26 +83,35 @@ namespace unvell.ReoGrid.Editor
 				if (e.Button == System.Windows.Forms.MouseButtons.Left)
 				{
 					this.dragging = true;
+					this.lastYDrag = this.PointToClient(Cursor.Position).Y;
 				}
 			};
 
-			const int fixedHeight = 26;
-
 			this.splitterDown.MouseMove += (s, e) =>
+			{
+				if (this.dragging)
 				{
-					if (this.dragging)
+					int yDrag = this.PointToClient(Cursor.Position).Y;
+					int height = this.Height + (yDrag - lastYDrag);
+
+					if (height > 300)
 					{
-						int height = this.PointToClient(Cursor.Position).Y;
-
-						var r = height % fixedHeight;
-						height += (r < (fixedHeight / 2) ? -r : (fixedHeight - r));
-
-						if (height >= fixedHeight && height <= 300)
-						{
-							this.Height = height;
-						}
+						height = 300;
+						lastYDrag = height + splitterDown.Height / 2;
 					}
-				};
+					else if (height < MinHeight)
+					{
+						height = MinHeight;
+						lastYDrag = height + splitterDown.Height / 2;
+					}
+					else
+					{
+						lastYDrag = yDrag;
+					}
+
+					this.Height = height;
+				}
+			};
 
 			this.splitterDown.MouseUp += (s, e) =>
 			{
@@ -181,8 +196,6 @@ namespace unvell.ReoGrid.Editor
 				this.pictureBox1.BackColor = value;
 			}
 		}
-
-		private bool dragging = false;
 
 		protected override void OnPaint(PaintEventArgs e)
 		{
