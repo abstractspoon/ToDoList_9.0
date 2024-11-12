@@ -194,7 +194,10 @@ namespace SpreadsheetContentControl
 
 		public String GetTextContent()
 		{
-			var text = GridControl.CurrentWorksheet.StringifyRange(ContentRange()).Trim();
+			var text = GridControl.CurrentWorksheet.StringifyRange(ContentRange(), false)
+						.Trim()
+						.Replace('\n', ' ')
+						.Replace('\t', ' ');
 
 			return text;
 		}
