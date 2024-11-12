@@ -62,7 +62,7 @@ namespace unvell.ReoGrid
 		/// </summary>
 		/// <param name="range">The range to be converted.</param>
 		/// <returns>Tabbed string contains all data converted from specified range.</returns>
-		public string StringifyRange(RangePosition range, bool escapeNewLines = true)
+		public string StringifyRange(RangePosition range)
 		{
 			int erow = range.EndRow;
 			int ecol = range.EndCol;
@@ -87,7 +87,7 @@ namespace unvell.ReoGrid
 
 						if (!string.IsNullOrEmpty(text))
 						{
-							if (escapeNewLines && text.Contains('\n'))
+							if (text.Contains('\n'))
 							{
 								text = string.Format("\"{0}\"", text);
 							}
