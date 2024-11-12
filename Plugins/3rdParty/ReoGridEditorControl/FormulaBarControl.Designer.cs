@@ -52,7 +52,6 @@ namespace unvell.ReoGrid.Editor
 			this.panel2 = new System.Windows.Forms.Panel();
 			this.pictureBox1 = new System.Windows.Forms.PictureBox();
 			this.splitterDown = new System.Windows.Forms.Splitter();
-			this.splitterUp = new System.Windows.Forms.Splitter();
 			this.panel3 = new System.Windows.Forms.Panel();
 			this.txtFormula = new System.Windows.Forms.TextBox();
 			this.leftPanel.SuspendLayout();
@@ -93,24 +92,24 @@ namespace unvell.ReoGrid.Editor
 			this.addressField.Location = new System.Drawing.Point(0, 0);
 			this.addressField.Name = "addressField";
 			this.addressField.Padding = new System.Windows.Forms.Padding(0, 2, 0, 0);
-			this.addressField.Size = new System.Drawing.Size(209, 20);
+			this.addressField.Size = new System.Drawing.Size(180, 20);
 			this.addressField.TabIndex = 7;
 			// 
 			// panel2
 			// 
 			this.panel2.Dock = System.Windows.Forms.DockStyle.Right;
-			this.panel2.Location = new System.Drawing.Point(209, 0);
+			this.panel2.Location = new System.Drawing.Point(180, 0);
 			this.panel2.Name = "panel2";
-			this.panel2.Size = new System.Drawing.Size(41, 20);
+			this.panel2.Size = new System.Drawing.Size(40, 20);
 			this.panel2.TabIndex = 10;
 			// 
 			// pictureBox1
 			// 
-			this.pictureBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)));
+			this.pictureBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Right | System.Windows.Forms.AnchorStyles.Bottom)));
 			this.pictureBox1.Image = global::unvell.ReoGrid.Editor.Properties.Resources.FunctionHS;
-			this.pictureBox1.Location = new System.Drawing.Point(221, 0);
+			this.pictureBox1.Location = new System.Drawing.Point(230, 3);
 			this.pictureBox1.Name = "pictureBox1";
-			this.pictureBox1.Size = new System.Drawing.Size(29, 20);
+			this.pictureBox1.Size = new System.Drawing.Size(16, 16);
 			this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
 			this.pictureBox1.TabIndex = 0;
 			this.pictureBox1.TabStop = false;
@@ -124,22 +123,13 @@ namespace unvell.ReoGrid.Editor
 			this.splitterDown.TabIndex = 9;
 			this.splitterDown.TabStop = false;
 			// 
-			// splitterUp
-			// 
-			this.splitterUp.Dock = System.Windows.Forms.DockStyle.Top;
-			this.splitterUp.Location = new System.Drawing.Point(0, 0);
-			this.splitterUp.Name = "splitterUp";
-			this.splitterUp.Size = new System.Drawing.Size(781, 1);
-			this.splitterUp.TabIndex = 10;
-			this.splitterUp.TabStop = false;
-			// 
 			// panel3
 			// 
 			this.panel3.Controls.Add(this.txtFormula);
 			this.panel3.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.panel3.Location = new System.Drawing.Point(251, 1);
+			this.panel3.Location = new System.Drawing.Point(250, 0);
 			this.panel3.Name = "panel3";
-			this.panel3.Padding = new System.Windows.Forms.Padding(3, 1, 1, 1);
+			this.panel3.Padding = new System.Windows.Forms.Padding(0, 0, 0, 1);
 			this.panel3.Size = new System.Drawing.Size(530, 192);
 			this.panel3.TabIndex = 11;
 			// 
@@ -147,7 +137,7 @@ namespace unvell.ReoGrid.Editor
 			// 
 			this.txtFormula.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.txtFormula.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.txtFormula.Location = new System.Drawing.Point(3, 1);
+			this.txtFormula.Location = new System.Drawing.Point(0, 0);
 			this.txtFormula.MinimumSize = new System.Drawing.Size(4, 20);
 			this.txtFormula.Multiline = true;
 			this.txtFormula.Name = "txtFormula";
@@ -162,7 +152,6 @@ namespace unvell.ReoGrid.Editor
 			this.Controls.Add(this.panel3);
 			this.Controls.Add(this.leftPanel);
 			this.Controls.Add(this.splitterDown);
-			this.Controls.Add(this.splitterUp);
 			this.Name = "FormulaBarControl";
 			this.Size = new System.Drawing.Size(781, 197);
 			this.leftPanel.ResumeLayout(false);
@@ -182,7 +171,6 @@ namespace unvell.ReoGrid.Editor
 		private AddressFieldControl addressField;
 		private System.Windows.Forms.Panel panel2;
 		private System.Windows.Forms.Splitter splitterDown;
-		private System.Windows.Forms.Splitter splitterUp;
 		private System.Windows.Forms.Panel panel3;
 		private System.Windows.Forms.TextBox txtFormula;
 

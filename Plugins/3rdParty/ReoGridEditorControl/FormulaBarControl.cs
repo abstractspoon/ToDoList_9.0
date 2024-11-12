@@ -24,6 +24,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.Windows.Forms.VisualStyles;
 
 using unvell.Common;
 using unvell.ReoGrid.Events;
@@ -41,11 +42,17 @@ namespace unvell.ReoGrid.Editor
 		private bool dragging = false;
 		private int lastYDrag;
 
+		public Color SplitterBackColor
+		{
+			set { this.splitterDown.BackColor = value; }
+		}
+
 		public FormulaBarControl()
 		{
 			InitializeComponent();
 
 			MinHeight = (addressField.Height + (this.Height - txtFormula.Height));
+			SplitterBackColor = Color.Empty;
 
 			txtFormula.KeyDown += txtFormula_KeyDown;
 			txtFormula.GotFocus += txtFormula_GotFocus;
@@ -53,12 +60,14 @@ namespace unvell.ReoGrid.Editor
 
 			panel1.Paint += (s, e) =>
 			{
-				e.Graphics.DrawLine(SystemPens.ControlLight, panel1.Width - 1, 0, panel1.Width - 1, panel1.Height);
+				if (!VisualStyleRenderer.IsSupported)
+					e.Graphics.DrawLine(SystemPens.ControlLight, panel1.Width - 1, 0, panel1.Width - 1, panel1.Height);
 			};
 
 			panel2.Paint += (s, e) =>
 			{
-				e.Graphics.DrawLine(SystemPens.ControlLight, 0, 0, 0, this.panel2.Bottom);
+				if (!VisualStyleRenderer.IsSupported)
+					e.Graphics.DrawLine(SystemPens.ControlLight, 0, 0, 0, this.panel2.Bottom);
 			};
 
 			panel1.Resize += (s, e) =>
@@ -68,14 +77,13 @@ namespace unvell.ReoGrid.Editor
 					pictureBox1.Width, panel1.ClientRectangle.Height);
 			};
 
-			this.splitterUp.BackColor = SystemColors.ControlLight;
-
 			this.splitterDown.Paint += (s, e) =>
 			{
-				var g = e.Graphics;
-
-				g.DrawLine(SystemPens.Control, 0, 0, splitterDown.Right, 0);
-				g.DrawLine(SystemPens.ControlDark, 0, splitterDown.Height - 1, splitterDown.Right, splitterDown.Height - 1);
+				if (!VisualStyleRenderer.IsSupported)
+				{
+					e.Graphics.DrawLine(SystemPens.Control, 0, 0, splitterDown.Right, 0);
+					e.Graphics.DrawLine(SystemPens.ControlDark, 0, splitterDown.Height - 1, splitterDown.Right, splitterDown.Height - 1);
+				}
 			};
 
 			this.splitterDown.MouseDown += (s, e) =>
@@ -120,10 +128,11 @@ namespace unvell.ReoGrid.Editor
 
 			this.leftPanel.Paint += (s, e) =>
 			{
-				var g = e.Graphics;
-
-				g.DrawLine(SystemPens.ControlLight, 0, panel1.Height, this.leftPanel.Right, panel1.Height);
-				g.DrawLine(SystemPens.ControlLight, this.leftPanel.Right - 1, panel1.Height, this.leftPanel.Right - 1, this.leftPanel.Bottom);
+				if (!VisualStyleRenderer.IsSupported)
+				{
+					e.Graphics.DrawLine(SystemPens.ControlLight, 0, panel1.Height, this.leftPanel.Right, panel1.Height);
+					e.Graphics.DrawLine(SystemPens.ControlLight, this.leftPanel.Right - 1, panel1.Height, this.leftPanel.Right - 1, this.leftPanel.Bottom);
+				}
 			};
 
 			ToolStripEx.RemapSysColors(this.pictureBox1.Image as Bitmap);
