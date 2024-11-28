@@ -39,6 +39,9 @@ struct TASKTIMELOGITEM
 	CString sPerson;
 	CString sPath;
 	BOOL bTracked;
+
+protected:
+	static double ParseTimeSpent(CString sValue);
 };
 typedef CArray<TASKTIMELOGITEM, TASKTIMELOGITEM&> CTaskTimeLogItemArray;
 
