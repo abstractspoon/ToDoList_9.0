@@ -212,6 +212,7 @@ namespace MindMapUIExtension
 
 		private bool m_ShowParentAsFolder;
 		private bool m_TaskColorIsBkgnd;
+		private bool m_ShowMixedCompletionState;
 		private bool m_IgnoreMouseClick;
         private bool m_ShowCompletionCheckboxes;
 		private bool m_StrikeThruDone;
@@ -425,6 +426,19 @@ namespace MindMapUIExtension
 				if (m_TaskColorIsBkgnd != value)
 				{
 					m_TaskColorIsBkgnd = value;
+					Invalidate();
+				}
+			}
+		}
+
+		public bool ShowMixedCompletionState
+		{
+			get { return m_ShowMixedCompletionState; }
+			set
+			{
+				if (m_ShowMixedCompletionState != value)
+				{
+					m_ShowMixedCompletionState = value;
 					Invalidate();
 				}
 			}
@@ -1222,7 +1236,7 @@ namespace MindMapUIExtension
             if (taskItem.IsDone(false))
                 return CheckBoxState.CheckedNormal;
 
-            if (taskItem.HasSomeSubtasksDone)
+            if (taskItem.HasSomeSubtasksDone && ShowMixedCompletionState)
                 return CheckBoxState.MixedNormal;
 
             // else

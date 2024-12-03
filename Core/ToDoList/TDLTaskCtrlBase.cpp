@@ -631,6 +631,7 @@ void CTDLTaskCtrlBase::OnStylesUpdated(const CTDCStyleMap& styles, BOOL bAllowRe
 		case TDCS_CALCREMAININGTIMEBYPERCENT:
 		case TDCS_COLORTEXTBYATTRIBUTE:
 		case TDCS_INCLUDEREFERENCESINCALCS:
+		case TDCS_SHOWMIXEDCOMPLETIONSTATE:
 			bInvalidateAll = TRUE;
 			break;
 
@@ -3013,14 +3014,7 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 			break;
 			
 		case TDCC_DONE:
-			{
-				TTCB_CHECK nCheck = (pTDI->IsDone() ? TTCBC_CHECKED : TTCNC_UNCHECKED);
-
-				if ((nCheck == TTCNC_UNCHECKED) && m_data.TaskHasCompletedSubtasks(pTDS))
-					nCheck = TTCBC_MIXED;
-
-				DrawColumnCheckBox(pDC, rSubItem, nCheck);
-			}
+			DrawColumnCheckBox(pDC, rSubItem, GetTaskCheckState(pTDI, pTDS));
 			break;
 			
 		default:
@@ -3029,6 +3023,17 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 			break;
 		}
 	}
+}
+
+CTDLTaskCtrlBase::TTCB_CHECK CTDLTaskCtrlBase::GetTaskCheckState(const  TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
+{
+	if (pTDI->IsDone())
+		return TTCBC_CHECKED;
+
+	if (HasStyle(TDCS_SHOWMIXEDCOMPLETIONSTATE) && m_data.TaskHasCompletedSubtasks(pTDS))
+		return TTCBC_MIXED;
+
+	return TTCBC_UNCHECKED;
 }
 
 int CTDLTaskCtrlBase::GetTaskIconIndex(DWORD dwTaskID) const
@@ -3255,7 +3260,7 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 			CRect rIcon(0, 0, ICON_SIZE, ICON_SIZE);
 			GraphicsMisc::AlignRect(rIcon, rCol, pDef->nTextAlignment | DT_VCENTER);
 
-			DrawColumnCheckBox(pDC, rIcon, (data.AsBool() ? TTCBC_CHECKED : TTCNC_UNCHECKED));
+			DrawColumnCheckBox(pDC, rIcon, (data.AsBool() ? TTCBC_CHECKED : TTCBC_UNCHECKED));
 		}
 		break;
 

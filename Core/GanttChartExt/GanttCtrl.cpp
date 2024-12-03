@@ -1140,6 +1140,10 @@ void CGanttCtrl::SetOption(DWORD dwOption, BOOL bSet)
 				RecalcDateRange();
 				break;
 
+			case GTLCF_SHOWMIXEDCOMPLETIONSTATE:
+				InvalidateAll(FALSE);
+				break;
+
 			case GTLCF_STRIKETHRUDONETASKS:
 				m_tree.Fonts().Clear();
 				InvalidateAll(FALSE);
@@ -1694,7 +1698,7 @@ void CGanttCtrl::OnTreeGetDispInfo(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 		{
 			pDispInfo->item.state = TCHC_CHECKED;
 		}
-		else if (pGI->bSomeSubtaskDone)
+		else if (pGI->bSomeSubtaskDone && HasOption(GTLCF_SHOWMIXEDCOMPLETIONSTATE))
 		{
 			pDispInfo->item.state = TCHC_MIXED;
 		}
