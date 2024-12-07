@@ -470,12 +470,10 @@ CString CTimeHelper::FormatTimeHMS(double dTime, TH_UNITS nUnits, TH_UNITS nLeft
 		ASSERT(0);
 		return _T("");
 	}
-
-	CString sTime = FormatTime(dTime, nUnits, 0, '\0');
-	ASSERT(sTime == FormatTimeHMS(Misc::Round(dTime), nUnits));
 	
 	if (bDecPlaces && (nLeftOverUnits != THU_NULL))
 	{
+		CString sTime = FormatTime((int)dTime, nUnits, 0, 0);
 		double dLeftOver = ((dTime - (int)dTime) * dLeftOverMultiplier + FUDGE);
 
 		// Include second element if at least 1
@@ -486,7 +484,13 @@ CString CTimeHelper::FormatTimeHMS(double dTime, TH_UNITS nUnits, TH_UNITS nLeft
 
 			sTime += FormatTimeHMS((int)dLeftOver, nLeftOverUnits);
 		}
+
+		return sTime;
 	}
+
+	// else
+	CString sTime = FormatTime(dTime, nUnits, 0, 0);
+	ASSERT(sTime == FormatTimeHMS(Misc::Round(dTime), nUnits));
 	
 	return sTime;
 }
