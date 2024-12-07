@@ -422,6 +422,21 @@ CString CTimeHelper::FormatTimeHMS(double dTime, TH_UNITS nUnitsFrom, DWORD dwFl
 	
 	CString sTime;
 	
+	if (dwFlags & HMS_PRESERVEUNITS)
+	{
+		// Clear values corresponding to units 'higher' than 'nUnitsFrom'
+		switch (nUnitsFrom)
+		{
+		case THU_MINS:		dHours = 0.0;	// fall through
+		case THU_HOURS:		dDays = 0.0;	// fall through
+		case THU_WEEKDAYS:	dWeeks = 0.0;	// fall through
+		case THU_DAYS:		dWeeks = 0.0;	// fall through
+		case THU_WEEKS:		dMonths = 0.0;	// fall through
+		case THU_MONTHS:	dYears = 0.0;	// fall through
+		case THU_YEARS:		break;
+		}
+	}
+
 	if (dYears >= 1.0)
 	{
 		sTime = FormatTimeHMS(dYears, THU_YEARS, THU_MONTHS, MONTHS2YEARS, bDecPlaces, cDelim);
