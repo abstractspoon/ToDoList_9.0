@@ -100,6 +100,7 @@ void CPreferencesUITasklistPage::OnFirstShow()
 	CPreferencesPageBase::OnFirstShow();
 
 	AddGroupLine(IDC_DATETIMEGROUP);
+	AddGroupLine(IDC_DONEGROUP);
 	AddGroupLine(IDC_OTHERGROUP);
 
 	GetDlgItem(IDC_DISPLAYFIRSTCOMMENTLINE)->EnableWindow(m_bShowComments);
