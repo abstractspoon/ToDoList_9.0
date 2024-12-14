@@ -917,7 +917,6 @@ void CPreferencesUITasklistColorsPage::OnSetduetodaytaskcolor()
 
 void CPreferencesUITasklistColorsPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
 {
-	// prefs
 	m_bColorPriority = pPrefs->GetProfileInt(szKey, _T("ColorPriority"), TRUE);
 	m_nPriorityColorOption = pPrefs->GetProfileInt(szKey, _T("PriorityColorOption"), -1);
 	m_sTreeFont = pPrefs->GetProfileString(szKey, _T("TreeFont"), _T("Arial"));
@@ -1066,7 +1065,6 @@ void CPreferencesUITasklistColorsPage::AddDefaultListItemsToAttributeColors()
 
 void CPreferencesUITasklistColorsPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 {
-	// save settings
 	CString sColorKey(szKey);
 	sColorKey += _T("\\Colors");
 	
@@ -1105,7 +1103,6 @@ void CPreferencesUITasklistColorsPage::SavePreferences(IPreferences* pPrefs, LPC
 		pPrefs->WriteProfileString(sKey, _T("Attrib"), ac.sAttrib);
 	}
 
-	// save settings
 	pPrefs->WriteProfileInt(szKey, _T("TextColorOption"), m_nTextColorOption);
 	pPrefs->WriteProfileInt(szKey, _T("ColorPriority"), m_bColorPriority);
 	pPrefs->WriteProfileInt(szKey, _T("PriorityColorOption"), m_nPriorityColorOption);
