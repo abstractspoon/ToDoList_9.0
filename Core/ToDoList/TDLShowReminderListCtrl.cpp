@@ -8,6 +8,7 @@
 #include "todoctrlreminders.h"
 
 #include "..\shared\DateHelper.h"
+#include "..\shared\AutoFlag.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -53,7 +54,8 @@ CTDLShowReminderListCtrl::CTDLShowReminderListCtrl(LPCTSTR szPrefsKey)
 	:
 	m_bHasIcons(FALSE),
 	m_dwNextReminderID(1),
-	m_sPrefsKey(szPrefsKey)
+	m_sPrefsKey(szPrefsKey),
+	m_bModifyingReminders(FALSE)
 {
 	SetMinItemHeight(GraphicsMisc::ScaleByDPIFactor(17));
 }
@@ -67,7 +69,8 @@ void CTDLShowReminderListCtrl::OnSize(UINT nType, int cx, int cy)
 {
 	CEnListCtrl::OnSize(nType, cx, cy);
 
-	RecalcColumnWidths();
+	if (!m_bModifyingReminders)
+		RecalcColumnWidths();
 }
 
 void CTDLShowReminderListCtrl::OnDestroy()
@@ -135,7 +138,8 @@ BOOL CTDLShowReminderListCtrl::AddReminder(const TDCREMINDER& rem)
 
 	if (bNewReminder)
 	{
-		// Insert at end
+		CAutoFlag af(m_bModifyingReminders, TRUE);
+
 		nItem = InsertItem(GetItemCount(), rem.GetTaskTitle());
 		ASSERT(nItem != -1);
 
@@ -209,6 +213,8 @@ BOOL CTDLShowReminderListCtrl::UpdateReminder(const TDCREMINDER& rem)
 
 void CTDLShowReminderListCtrl::UpdateReminder(const TDCREMINDER& rem, int nItem)
 {
+	CAutoFlag af(m_bModifyingReminders, TRUE);
+
 	ASSERT(nItem != -1);
 
 	// Assume tasklist cannot change
@@ -227,6 +233,8 @@ BOOL CTDLShowReminderListCtrl::RemoveReminder(const TDCREMINDER& rem)
 	if (nItem == -1)
 		return FALSE;
 
+	CAutoFlag af(m_bModifyingReminders, TRUE);
+
 	BOOL bUpdateTaskHaveIcons = rem.HasIcon();
 	DWORD dwRemID = GetReminderID(nItem);
 
@@ -244,6 +252,8 @@ BOOL CTDLShowReminderListCtrl::RemoveReminder(const TDCREMINDER& rem)
 int CTDLShowReminderListCtrl::RemoveReminders(const CFilteredToDoCtrl& tdc)
 {
 	ASSERT(m_mapReminders.GetCount() == GetItemCount());
+
+	CAutoFlag af(m_bModifyingReminders, TRUE);
 
 	int nItem = GetItemCount(), nNumRemoved = 0;
 
