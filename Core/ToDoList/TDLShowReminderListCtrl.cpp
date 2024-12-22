@@ -476,7 +476,7 @@ void CTDLShowReminderListCtrl::DrawItemBackground(CDC* pDC, int nItem, const CRe
 		return;
 	}
 
-	CEnListCtrl::DrawItemBackground(pDC, nItem, rItem, bSelected, crBack, bDropHighlighted, bFocused);
+	CEnListCtrl::DrawItemBackground(pDC, nItem, rItem, crBack, bSelected, bDropHighlighted, bFocused);
 }
 
 void CTDLShowReminderListCtrl::UpdateIconStatus()
