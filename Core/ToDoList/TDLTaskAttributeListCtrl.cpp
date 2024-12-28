@@ -3205,12 +3205,14 @@ void CTDLTaskAttributeListCtrl::OnComboEditChange(UINT nCtrlID)
 	SetValueText(nRow, sNewValue);
 }
 
-void CTDLTaskAttributeListCtrl::NotifyParentEdit(int nRow, LPARAM nFlags)
+void CTDLTaskAttributeListCtrl::NotifyParentEdit(int nRow, LPARAM bUnitsChange)
 {
+// 	ASSERT(!bUnitsChange || GetCellType(nRow, VALUE_COL) == )
+
 	UpdateWindow();
 
 	// Refresh the cell text only if the edit failed
-	if (!GetParent()->SendMessage(WM_TDCN_ATTRIBUTEEDITED, GetAttributeID(nRow, TRUE), nFlags))
+	if (!GetParent()->SendMessage(WM_TDCN_ATTRIBUTEEDITED, GetAttributeID(nRow, TRUE), bUnitsChange))
 		RefreshSelectedTasksValue(nRow);
 }
 
@@ -3235,13 +3237,13 @@ void CTDLTaskAttributeListCtrl::OnSingleFileLinkChange()
 	SetValueText(nRow, sFile);
 }
 
-BOOL CTDLTaskAttributeListCtrl::SetValueText(int nRow, const CString& sNewText, LPARAM nFlags)
+BOOL CTDLTaskAttributeListCtrl::SetValueText(int nRow, const CString& sNewText, LPARAM bUnitsChange)
 {
 	if (sNewText == GetItemText(nRow, VALUE_COL))
 		return FALSE;
 
 	VERIFY(SetItemText(nRow, VALUE_COL, sNewText));
-	NotifyParentEdit(nRow, nFlags);
+	NotifyParentEdit(nRow, bUnitsChange);
 
 	return TRUE;
 }
