@@ -191,6 +191,7 @@ BEGIN_MESSAGE_MAP(CTDLTaskAttributeListCtrl, CInputListCtrl)
 
 	ON_NOTIFY(DTN_CLOSEUP, IDC_DATE_PICKER, OnDateCloseUp)
 	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_DATE_PICKER, OnDateChange)
+	ON_NOTIFY(NM_KILLFOCUS, IDC_DATE_PICKER, OnDateKillFocus)
 
 	ON_EN_CHANGE(IDC_DEPENDS_EDIT, OnDependsChange)
 	ON_EN_KILLFOCUS(IDC_TIMEPERIOD_EDIT, OnTimePeriodChange)
@@ -3207,8 +3208,6 @@ void CTDLTaskAttributeListCtrl::OnComboEditChange(UINT nCtrlID)
 
 void CTDLTaskAttributeListCtrl::NotifyParentEdit(int nRow, LPARAM bUnitsChange)
 {
-// 	ASSERT(!bUnitsChange || GetCellType(nRow, VALUE_COL) == )
-
 	UpdateWindow();
 
 	// Refresh the cell text only if the edit failed
@@ -3288,6 +3287,8 @@ void CTDLTaskAttributeListCtrl::OnDateCloseUp(NMHDR* pNMHDR, LRESULT* pResult)
 	ASSERT(pNMHDR->idFrom == IDC_DATE_PICKER);
 
 	HideControl(m_datePicker); 
+	NotifyParentEdit(GetCurSel());
+
 	*pResult = 0;
 }
 
@@ -3296,23 +3297,23 @@ void CTDLTaskAttributeListCtrl::OnDateChange(NMHDR* pNMHDR, LRESULT* pResult)
 	UNREFERENCED_PARAMETER(pNMHDR);
 	ASSERT(pNMHDR->idFrom == IDC_DATE_PICKER);
 
-	// Only handle this if the calendar is closed
+	// Only handle this if the calendar is closed ie. it's a manual edit
 	if (!m_datePicker.IsCalendarVisible())
 	{
-		// Note: Don't hide the date picker because the user 
-		// may be editing the date components manually
-		int nRow = GetCurSel();
-
-		CString sNewValue;
+		// Use the cell text as a scratch-pad for storing intermediate
+		// date edits but without notifying our parent
 		COleDateTime date;
 
 		if (m_datePicker.GetTime(date))
-			sNewValue = m_formatter.GetDateOnly(date, TRUE);
-		
-		SetValueText(nRow, sNewValue);
+			VERIFY(SetItemText(GetCurSel(), VALUE_COL, m_formatter.GetDateOnly(date, TRUE)));
 	}
 
 	*pResult = 0;
+}
+
+void CTDLTaskAttributeListCtrl::OnDateKillFocus(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	NotifyParentEdit(GetCurSel());
 }
 
 LRESULT CTDLTaskAttributeListCtrl::OnAutoComboAddDelete(WPARAM wp, LPARAM lp)
@@ -3584,6 +3585,23 @@ void CTDLTaskAttributeListCtrl::CFileDropTarget::OnDragLeave(CWnd* pWnd)
 BOOL CTDLTaskAttributeListCtrl::PreTranslateMessage(MSG* pMsg)
 {
 	m_tooltip.FilterToolTipMessage(pMsg);
+
+	// special WM_KEYDOWN handling for DateTimeCtrl because base class
+	// eats VK_RETURN/VK_CANCEL
+	if ((pMsg->message == WM_KEYDOWN) && (GetFocus() == &m_datePicker))
+	{
+		switch (pMsg->wParam)
+		{
+		case VK_RETURN:
+			NotifyParentEdit(GetCurSel());
+			break;
+
+		case VK_ESCAPE:
+			// Revert any changes
+			RefreshSelectedTasksValue(GetCurSel());
+			break;
+		}
+	}
 
 	return CInputListCtrl::PreTranslateMessage(pMsg);
 }
