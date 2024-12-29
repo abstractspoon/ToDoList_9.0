@@ -1276,14 +1276,23 @@ BOOL CTDCCustomAttribDefinitionArray::AnyCalculationUsesAnyAttribute(const CTDCA
 		if (!def.IsCalculation())
 			continue;
 		
-		if (mapAttribIDs.Has(def.Calculation().opFirst.nAttributeID) ||
-			mapAttribIDs.Has(def.Calculation().opSecond.nAttributeID))
-		{
+		if (mapAttribIDs.Has(def.Calculation().opFirst.nAttributeID))
 			return TRUE;
-		}
+
+		if (mapAttribIDs.Has(def.Calculation().opSecond.nAttributeID))
+			return TRUE;
 	}
 
 	return FALSE;
+}
+
+TDC_ATTRIBUTE CTDCCustomAttribDefinitionArray::GetCalculationOperandAttributeID(const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& op) const
+{
+	if (op.sCustAttribID.IsEmpty())
+		return op.nAttributeID;
+
+	// TODO
+	return TDCA_CUSTOMATTRIB;
 }
 
 TDC_ATTRIBUTE CTDCCustomAttribDefinitionArray::GetAttributeID(TDC_COLUMN nCustColID) const

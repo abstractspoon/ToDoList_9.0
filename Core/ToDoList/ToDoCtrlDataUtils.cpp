@@ -3504,10 +3504,23 @@ BOOL CTDCTaskCalculator::DoCustomAttributeCalculation(const TODOITEM* pTDI, cons
 
 			if (bFirstIsDate && bSecondIsDate)
 			{
-				// If the first date falls on the end of the day
-				// then the result date needs decrementing
-				if (CDateHelper::IsEndOfDay(dFirstVal, TRUE))
-					dResult++;
+				if (dResult > 0.0)
+				{
+					dResult = CDateHelper().CalcDuration(dSecondVal, dFirstVal, DHU_DAYS, TRUE);
+				}
+				else if (dResult < 0.0)
+				{
+					dResult = -CDateHelper().CalcDuration(dFirstVal, dSecondVal, DHU_DAYS, TRUE);
+				}
+				else
+				{
+					// Do the best we can using heuristics 
+
+					// If the first date falls on the end of the day
+					// then the result date needs decrementing
+					if (CDateHelper::IsEndOfDay(dFirstVal, TRUE))
+						dResult++;
+				}
 			}
 		}
 		break;

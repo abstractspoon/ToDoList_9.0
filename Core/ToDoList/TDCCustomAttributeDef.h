@@ -245,6 +245,7 @@ public:
 
 	// Calculation helpers requiring access to all attribute definitions
 	BOOL IsValidCalculation(const TDCCUSTOMATTRIBUTECALCULATION& calc, BOOL bAllowNone = TRUE) const;
+	TDC_ATTRIBUTE GetCalculationOperandAttributeID(const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& op) const;
 	DWORD GetCalculationOperandDataType(const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& op) const;
 	DWORD GetCalculationResultDataType(const TDCCUSTOMATTRIBUTECALCULATION& calc) const;
 	BOOL CalculationHasFeature(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, DWORD dwFeature) const;
