@@ -1169,12 +1169,27 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValues(const CTDCAttributeMa
 	CHoldRedraw hr(*this);
 	HideAllControls();
 
-	int nRow = GetItemCount();
 	BOOL bRefreshAll = mapAttribIDs.Has(TDCA_ALL);
+	BOOL bRefreshCustomCalcs = (bRefreshAll || m_aCustomAttribDefs.AnyCalculationUsesAnyAttribute(mapAttribIDs));
+
+	int nRow = GetItemCount();
 
 	while (nRow--)
 	{
-		if (bRefreshAll || mapAttribIDs.Has(GetAttributeID(nRow, TRUE)))
+		BOOL bWantRefresh = bRefreshAll;
+
+		if (!bWantRefresh)
+		{
+			TDC_ATTRIBUTE nRowAttribID = GetAttributeID(nRow, TRUE);
+			bWantRefresh = mapAttribIDs.Has(nRowAttribID);
+
+			if (!bWantRefresh && bRefreshCustomCalcs && TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nRowAttribID))
+			{
+				bWantRefresh = (m_aCustomAttribDefs.GetAttributeDataType(nRowAttribID, FALSE) == TDCCA_CALCULATION);
+			}
+		}
+
+		if (bWantRefresh)
 		{
 			if (m_aSelectedTaskIDs.GetSize())
 				RefreshSelectedTasksValue(nRow);
