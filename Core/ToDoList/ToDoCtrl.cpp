@@ -4613,6 +4613,7 @@ BOOL CToDoCtrl::LoadTasks(const CTaskFile& tasks)
 	m_dtLastTaskMod = COleDateTime::GetCurrentTime();
 
 	Resize();
+	UpdateData(FALSE);
 
 	// restore previously visibility
 	if (bHidden)
@@ -5893,7 +5894,7 @@ void CToDoCtrl::SetProjectName(const CString& sProjectName)
 		m_bModified = TRUE;
 
 		if (GetSafeHwnd())
-			UpdateDataEx(this, IDC_PROJECTNAME, m_sProjectName, FALSE);
+			UpdateData(FALSE);
 	}
 }
 
