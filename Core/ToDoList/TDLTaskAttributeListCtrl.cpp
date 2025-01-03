@@ -1754,6 +1754,7 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 		break;
 
 	case TDCA_PRIORITY:
+		if (!sText.IsEmpty())
 		{
 			int nPriority = _ttoi(sText);
 
@@ -1780,6 +1781,7 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 		return;
 
 	case TDCA_RISK:
+		if (!sText.IsEmpty())
 		{
 			int nRisk = _ttoi(sText);
 
