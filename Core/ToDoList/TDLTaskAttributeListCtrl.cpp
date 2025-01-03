@@ -3908,14 +3908,24 @@ void CTDLTaskAttributeListCtrl::OnContextMenu(CWnd* pWnd, CPoint pos)
 
 		// Prepare menu items
 		BOOL bMultiSel = (m_aSelectedTaskIDs.GetSize() > 1);
+		CString sAttrib = GetItemText(nRow, ATTRIB_COL);
+
+		// Copy command
 		CEnString sMenuText;
 
-		CString sAttrib = GetItemText(nRow, ATTRIB_COL);
-		sMenuText.Format((bMultiSel ? IDS_ATTRIBCTRL_COPYATTRIBVALUES : IDS_ATTRIBCTRL_COPYATTRIBVALUE), sAttrib);
+		if (GetParent()->SendMessage(WM_TDCM_CANCOPYTASKATTRIBUTE, nAttribID))
+		{
+			sMenuText.Format((bMultiSel ? IDS_ATTRIBCTRL_COPYATTRIBVALUES : IDS_ATTRIBCTRL_COPYATTRIBVALUE), sAttrib);
 
-		CEnMenu::SetMenuString(*pPopup, ID_ATTRIBLIST_COPYATTRIBVALUES, sMenuText, MF_BYCOMMAND);
-		pPopup->EnableMenuItem(ID_ATTRIBLIST_COPYATTRIBVALUES, MF_BYCOMMAND | MF_ENABLED);
+			CEnMenu::SetMenuString(*pPopup, ID_ATTRIBLIST_COPYATTRIBVALUES, sMenuText, MF_BYCOMMAND);
+			pPopup->EnableMenuItem(ID_ATTRIBLIST_COPYATTRIBVALUES, MF_BYCOMMAND | MF_ENABLED);
+		}
+		else
+		{
+			pPopup->EnableMenuItem(ID_ATTRIBLIST_COPYATTRIBVALUES, MF_BYCOMMAND | MF_DISABLED);
+		}
 
+		// Paste command
 		TDC_ATTRIBUTE nFromAttribID = TDCA_NONE;
 
 		if (GetParent()->SendMessage(WM_TDCM_CANPASTETASKATTRIBUTE, nAttribID, (LPARAM)&nFromAttribID))
@@ -3931,6 +3941,19 @@ void CTDLTaskAttributeListCtrl::OnContextMenu(CWnd* pWnd, CPoint pos)
 			pPopup->EnableMenuItem(ID_ATTRIBLIST_PASTEATTRIBVALUES, MF_BYCOMMAND | MF_DISABLED);
 		}
 
+		// Clear command
+		if (CanEditCell(nRow, nCol))
+		{
+			sMenuText.Format((bMultiSel ? IDS_ATTRIBCTRL_CLEARATTRIBVALUES : IDS_ATTRIBCTRL_CLEARATTRIBVALUE), sAttrib);
+
+			CEnMenu::SetMenuString(*pPopup, ID_ATTRIBLIST_CLEARATTRIBVALUES, sMenuText, MF_BYCOMMAND);
+			pPopup->EnableMenuItem(ID_ATTRIBLIST_CLEARATTRIBVALUES, MF_BYCOMMAND | MF_ENABLED);
+		}
+		else
+		{
+			pPopup->EnableMenuItem(ID_ATTRIBLIST_CLEARATTRIBVALUES, MF_BYCOMMAND | MF_DISABLED);
+		}
+
 		UINT nCmdID = ::TrackPopupMenu(*pPopup, TPM_RETURNCMD | TPM_LEFTALIGN | TPM_LEFTBUTTON,
 									   pos.x, pos.y, 0, GetSafeHwnd(), NULL);
 
@@ -3942,6 +3965,10 @@ void CTDLTaskAttributeListCtrl::OnContextMenu(CWnd* pWnd, CPoint pos)
 
 		case ID_ATTRIBLIST_PASTEATTRIBVALUES:
 			GetParent()->SendMessage(WM_TDCM_PASTETASKATTRIBUTE, nAttribID);
+			break;
+
+		case ID_ATTRIBLIST_CLEARATTRIBVALUES:
+			GetParent()->SendMessage(WM_TDCM_CLEARTASKATTRIBUTE, nAttribID);
 			break;
 		}
 	}
