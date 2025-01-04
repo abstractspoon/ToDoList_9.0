@@ -114,7 +114,7 @@ protected:
 	virtual void EndTimeTracking(BOOL bAllowConfirm, BOOL bNotify);
 	virtual BOOL GetAllTasksForExtensionViewUpdate(const CTDCAttributeMap& mapAttrib, CTaskFile& tasks) const;
 	virtual void RebuildList(BOOL bChangeGroup = FALSE, TDC_COLUMN nNewGroupBy = TDCC_NONE, const void* pContext = NULL);
-	virtual BOOL WantAddTreeTaskToList(DWORD dwTaskID, const void* pContext) const;
+	virtual BOOL WantAddTreeTaskToList(DWORD dwTaskID, const void* pContext = NULL) const;
 	virtual DWORD RecreateRecurringTaskInTree(const CTaskFile& task, const COleDateTime& dtNext, BOOL bDueDate);
 	virtual DWORD MergeNewTaskIntoTree(const CTaskFile& tasks, HTASKITEM hTask, DWORD dwParentTaskID, BOOL bAndSubtasks);
 	virtual void OnStylesUpdated(const CTDCStyleMap& styles);
