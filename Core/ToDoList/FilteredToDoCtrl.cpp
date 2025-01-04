@@ -637,40 +637,27 @@ int CFilteredToDoCtrl::GetAllTaskIDs(CDWordArray& aTaskIDs, BOOL bIncParents, BO
 
 BOOL CFilteredToDoCtrl::WantAddTreeTaskToList(DWORD dwTaskID, const void* pContext) const
 {
-	if (!CTabbedToDoCtrl::WantAddTreeTaskToList(dwTaskID, pContext))
+	BOOL bWantAdd = CTabbedToDoCtrl::WantAddTreeTaskToList(dwTaskID, pContext);
+
+	if ((pContext == NULL) || !bWantAdd)
+		return bWantAdd;
+
+	// Hide non-matching parents
+	const TODOSTRUCTURE* pTDS = NULL;
+	const TODOITEM* pTDI = NULL;
+
+	if (!m_data.GetTask(dwTaskID, pTDI, pTDS))
 		return FALSE;
 
-	if (pContext || HasAnyFilter())
+	if (pTDS->HasSubTasks())
 	{
-		// Hide non-matching:
-		// 1. Newly recreated recurring tasks 
-		// 2. Parent tasks
-		const TODOSTRUCTURE* pTDS = NULL;
-		const TODOITEM* pTDI = NULL;
+		const SEARCHPARAMS* pFilter = static_cast<const SEARCHPARAMS*>(pContext);
+		SEARCHRESULT unused;
 
-		if (!m_data.GetTask(dwTaskID, pTDI, pTDS))
-			return FALSE;
-
-		if ((m_bRecreatingRecurringTasks && pTDI->IsRecurring()) || pTDS->HasSubTasks())
-		{
-			// Set up context if required
-			const SEARCHPARAMS* pFilter = static_cast<const SEARCHPARAMS*>(pContext);
-
-			SEARCHPARAMS params;
-			SEARCHRESULT unused;
-
-			if (pFilter == NULL)
-			{
-				m_filter.BuildFilterQuery(params, m_aCustomAttribDefs);
-				pFilter = &params;
-			}
-
-			return m_matcher.TaskMatches(pTDI, pTDS, *pFilter, HasDueTodayColor(), unused);
-		}
+		bWantAdd = m_matcher.TaskMatches(pTDI, pTDS, *pFilter, HasDueTodayColor(), unused);
 	}
 
-	// all else
-	return TRUE;
+	return bWantAdd;
 }
 
 HTREEITEM CFilteredToDoCtrl::RebuildTree(const void* pContext)
@@ -917,8 +904,8 @@ void CFilteredToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const 
 		bListRefiltered = InListView();
 	}
 
-	// Calling our base class may cause either the list or one of 
-	// the extensions to be rebuilt which we want to avoid
+	// This may cause either the list or one of the extensions to be rebuilt
+	// we set flags and ignore it
 	CAutoFlag af(m_bIgnoreListRebuild, bListRefiltered);
 	CAutoFlag af2(m_bIgnoreExtensionUpdate, bTreeRefiltered);
 

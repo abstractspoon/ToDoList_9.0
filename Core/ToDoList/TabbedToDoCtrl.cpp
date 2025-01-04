@@ -3483,7 +3483,7 @@ void CTabbedToDoCtrl::RebuildList(BOOL bChangeGroup, TDC_COLUMN nNewGroupBy, con
 	BuildListGroupByCombo();
 }
 
-BOOL CTabbedToDoCtrl::WantAddTreeTaskToList(DWORD dwTaskID, const void* /*pContext*/) const
+BOOL CTabbedToDoCtrl::WantAddTreeTaskToList(DWORD dwTaskID, const void* pContext) const
 {
 	ASSERT(!m_data.IsTaskParent(dwTaskID) || !(HasListOption(LVO_HIDEPARENTS) || HasStyle(TDCS_ALWAYSHIDELISTPARENTS)));
 	
@@ -3692,11 +3692,8 @@ void CTabbedToDoCtrl::UpdateListView(const CTDCAttributeMap& mapAttribIDs, const
 		if (nSel != -1)
 			nSel++;
 
-		DWORD dwTaskID = aModTaskIDs[0];
-		ASSERT(dwTaskID);
-
-		if (WantAddTreeTaskToList(dwTaskID))
-			m_taskList.InsertItem(dwTaskID, nSel);
+		ASSERT(aModTaskIDs[0]);
+		m_taskList.InsertItem(aModTaskIDs[0], nSel);
 	}
 	else if (mapAttribIDs.Has(TDCA_NEWTASK) ||
 			 mapAttribIDs.Has(TDCA_UNDO) ||
