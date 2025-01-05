@@ -3698,6 +3698,9 @@ void CTabbedToDoCtrl::UpdateListView(const CTDCAttributeMap& mapAttribIDs, const
 		if (WantAddTreeTaskToList(dwTaskID))
 		{
 			VERIFY(m_taskList.InsertTaskItem(dwTaskID, nPos) >= 0);
+		
+			if (bInListView)
+				SyncListSelectionToTree(TRUE);
 		}
 	}
 	else if (mapAttribIDs.Has(TDCA_NEWTASK) ||
@@ -6520,6 +6523,7 @@ void CTabbedToDoCtrl::SyncListSelectionToTree(BOOL bEnsureSelection)
 		if (!cacheList.SelectionMatches(cacheTree))
 		{
 			cacheTree.dwFirstVisibleTaskID = 0;
+			bSelChange = TRUE;
 
 			if (m_taskList.RestoreSelection(cacheTree, bEnsureSelection))
 			{
@@ -6528,14 +6532,7 @@ void CTabbedToDoCtrl::SyncListSelectionToTree(BOOL bEnsureSelection)
 				CacheListSelection(cacheList);
 
 				if (!cacheList.SelectionMatches(cacheTree))
-				{
 					RestoreTreeSelection(cacheList);
-					bSelChange = TRUE;
-				}
-			}
-			else
-			{
-				bSelChange = TRUE;
 			}
 		}
 	}
