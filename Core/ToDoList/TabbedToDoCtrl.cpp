@@ -3466,7 +3466,7 @@ void CTabbedToDoCtrl::RebuildList(BOOL bChangeGroup, TDC_COLUMN nNewGroupBy, con
 
 			if (WantAddTreeTaskToList(dwTaskID, pContext))
 			{
-				VERIFY (m_taskList.InsertItem(dwTaskID) >= 0);
+				VERIFY (m_taskList.InsertTaskItem(dwTaskID) >= 0);
 			}	
 		}
 
@@ -3693,7 +3693,7 @@ void CTabbedToDoCtrl::UpdateListView(const CTDCAttributeMap& mapAttribIDs, const
 			nSel++;
 
 		ASSERT(aModTaskIDs[0]);
-		m_taskList.InsertItem(aModTaskIDs[0], nSel);
+		m_taskList.InsertTaskItem(aModTaskIDs[0], nSel);
 	}
 	else if (mapAttribIDs.Has(TDCA_NEWTASK) ||
 			 mapAttribIDs.Has(TDCA_UNDO) ||
