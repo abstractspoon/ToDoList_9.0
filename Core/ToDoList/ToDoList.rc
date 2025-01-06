@@ -28,7 +28,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 8,999,1000,3
+ FILEVERSION 9,0,1,1
  PRODUCTVERSION 1,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
@@ -47,15 +47,15 @@ BEGIN
             VALUE "Comments", "\0"
             VALUE "CompanyName", "AbstractSpoon Software\0"
             VALUE "FileDescription", "ToDoList\0"
-            VALUE "FileVersion", "8, 999, 1000, 3\0"
+            VALUE "FileVersion", "9, 0, 1, 1\0"
             VALUE "InternalName", "ToDoList\0"
-            VALUE "LegalCopyright", "Copyright (c) AbstractSpoon 2003-24\0"
+            VALUE "LegalCopyright", "Copyright (c) AbstractSpoon 2003-25\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "ToDoList.exe\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "ToDoList\0"
             VALUE "ProductVersion", "1, 0, 0, 0\0"
-            VALUE "SpecialBuild", "Release Candidate of ToDoList 9.0\0"
+            VALUE "SpecialBuild", "Stable Release of ToDoList 9.0\0"
         END
     END
     BLOCK "VarFileInfo"
@@ -1630,7 +1630,7 @@ BEGIN
     COMBOBOX        IDC_REUSEOPTIONS,257,183,111,76,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
     CONTROL         "Preserve comments",IDC_PRESERVECOMMENTS,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,243,200,124,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,257,200,116,10
     DEFPUSHBUTTON   "OK",IDOK,273,225,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,327,225,50,14
     CONTROL         "",IDC_DIVIDER,"Static",SS_ETCHEDHORZ,115,138,255,1
@@ -1794,7 +1794,7 @@ BEGIN
     ICON            IDR_MAINFRAME_STD,IDC_STATIC,7,8,20,20
     EDITTEXT        IDC_TITLE,34,7,173,12,ES_AUTOHSCROLL | ES_READONLY | NOT 
                     WS_BORDER
-    LTEXT           "(c) Abstractspoon 2003-24",IDC_STATIC,213,7,87,8
+    LTEXT           "(c) Abstractspoon 2003-25",IDC_STATIC,213,7,87,8
     ICON            IDI_ABSTRACTSPOON,IDC_STATIC,304,7,20,20
     LTEXT           "A simple and effective way to keep on top of your daily tasks",
                     IDC_STATIC,34,20,267,8
@@ -4209,6 +4209,9 @@ BEGIN
 
         MENUITEM "Paste Attribute Value",       ID_ATTRIBLIST_PASTEATTRIBVALUES
 
+        MENUITEM SEPARATOR
+        MENUITEM "Clear Attribute Value",       ID_ATTRIBLIST_CLEARATTRIBVALUES
+
     END
 END
 
@@ -6026,6 +6029,8 @@ BEGIN
     IDS_ATTRIBTIP_DEPENDENTDATE "Dependent date"
     IDS_ATTRIBTIP_COMPLETEDTASK "Completed task"
     IDS_ATTRIBTIP_MODIFY    "Modify"
+    IDS_ATTRIBCTRL_CLEARATTRIBVALUE "Clear '%s' Value"
+    IDS_ATTRIBCTRL_CLEARATTRIBVALUES "Clear '%s' Values"
 END
 
 STRINGTABLE DISCARDABLE 

@@ -1448,13 +1448,10 @@ DWORD CTDCCustomAttribDefinitionArray::GetCalculationOperandDataType(const TDCCU
 			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = ElementAt(nAtt);
 
 			if (attribDef.IsDataType(TDCCA_CALCULATION))
-			{
 				return GetCalculationResultDataType(attribDef.Calculation()); // RECURSIVE CALL
-			}
-			else if (!attribDef.IsMultiList())
-			{
+
+			if (!attribDef.IsMultiList())
 				return attribDef.GetDataType();
-			}
 		}
 	}
 

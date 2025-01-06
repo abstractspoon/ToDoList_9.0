@@ -2912,10 +2912,16 @@ BOOL CToDoCtrl::SetSelectedTaskExternalID(const CString& sExtID)
 
 BOOL CToDoCtrl::GotoSelectedTaskFileLink(int nFile)
 {
+	if (nFile < 0)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
 	CStringArray aFiles;
 	int nNumFiles = m_ctrlAttributes.GetFileLinks(aFiles);
 
-	if (nFile < (nNumFiles - 1))
+	if (nFile < nNumFiles)
 		return GotoFile(aFiles[nFile]);
 
 	return FALSE;
@@ -4613,6 +4619,7 @@ BOOL CToDoCtrl::LoadTasks(const CTaskFile& tasks)
 	m_dtLastTaskMod = COleDateTime::GetCurrentTime();
 
 	Resize();
+	UpdateData(FALSE);
 
 	// restore previously visibility
 	if (bHidden)
@@ -5893,7 +5900,7 @@ void CToDoCtrl::SetProjectName(const CString& sProjectName)
 		m_bModified = TRUE;
 
 		if (GetSafeHwnd())
-			UpdateDataEx(this, IDC_PROJECTNAME, m_sProjectName, FALSE);
+			UpdateData(FALSE);
 	}
 }
 
