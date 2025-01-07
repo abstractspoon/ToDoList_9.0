@@ -3476,19 +3476,18 @@ BOOL CTDCTaskCalculator::DoCustomAttributeCalculation(const TODOITEM* pTDI, cons
 	if (!GetSecondCustomAttributeOperandValue(pTDI, pTDS, calc, dSecondVal, nUnits, bAggregated))
 		return FALSE;
 
-	// Date calculations may need extra post-processing
-	BOOL bFirstIsDate = (m_data.m_aCustomAttribDefs.GetCalculationOperandDataType(calc.opFirst) == TDCCA_DATE);
-	BOOL bSecondIsDate = (m_data.m_aCustomAttribDefs.GetCalculationOperandDataType(calc.opSecond) == TDCCA_DATE);
-
 	switch (calc.nOperator)
 	{
 	case TDCCAC_ADD:
 		{
 			dResult = (dFirstVal + dSecondVal);
 
+			// Date calculations may need extra post-processing
+			BOOL bFirstIsDate = (m_data.m_aCustomAttribDefs.GetCalculationOperandDataType(calc.opFirst) == TDCCA_DATE);
+
 			if (bFirstIsDate)
 			{
-				ASSERT(!bSecondIsDate);
+				ASSERT(m_data.m_aCustomAttribDefs.GetCalculationOperandDataType(calc.opSecond) != TDCCA_DATE);
 
 				// If the date has a time component but the result falls on
 				// a day boundary then the result date needs decrementing
@@ -3499,36 +3498,11 @@ BOOL CTDCTaskCalculator::DoCustomAttributeCalculation(const TODOITEM* pTDI, cons
 		break;
 
 	case TDCCAC_SUBTRACT:
-		{
-			dResult = (dFirstVal - dSecondVal);
-
-			if (bFirstIsDate && bSecondIsDate)
-			{
-				if (dResult > 0.0)
-				{
-					dResult = CDateHelper().CalcDuration(dSecondVal, dFirstVal, DHU_DAYS, TRUE);
-				}
-				else if (dResult < 0.0)
-				{
-					dResult = -CDateHelper().CalcDuration(dFirstVal, dSecondVal, DHU_DAYS, TRUE);
-				}
-				else
-				{
-					// Do the best we can using heuristics 
-
-					// If the first date falls on the end of the day
-					// then the result date needs decrementing
-					if (CDateHelper::IsEndOfDay(dFirstVal, TRUE))
-						dResult++;
-				}
-			}
-		}
+		dResult = (dFirstVal - dSecondVal);
 		break;
 
 	case TDCCAC_MULTIPLY:
-		{
-			dResult = (dFirstVal * dSecondVal);
-		}
+		dResult = (dFirstVal * dSecondVal);
 		break;
 
 	case TDCCAC_DIVIDE:
@@ -3557,7 +3531,52 @@ BOOL CTDCTaskCalculator::GetFirstCustomAttributeOperandValue(const TODOITEM* pTD
 	}
 
 	// else built-in attribute
-	return GetTaskCustomAttributeOperandValue(pTDI, pTDS, calc.opFirst.nAttributeID, dValue, nUnits, bAggregated);
+	if (!GetTaskCustomAttributeOperandValue(pTDI, pTDS, calc.opFirst.nAttributeID, dValue, nUnits, bAggregated))
+		return FALSE;
+
+	AdjustOperandValueForEndOfDay(calc.opFirst, calc.nOperator, calc.opSecond, dValue, nUnits);
+
+	return TRUE;
+}
+
+void CTDCTaskCalculator::AdjustOperandValueForEndOfDay(const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& op,
+													   TDCCA_CALC_OPERATOR nOperator,
+													   const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& opOther,
+													   double& dValue,
+													   TDC_UNITS nUnits) const
+{
+	// A 'Due Date' without a time component requires special handling when 
+	// subtracting it from another date (or vice versa) because it needs to 
+	// be treated as 'end of day'.
+	// Same with 'Today' which never has a time component
+	if (dValue == 0.0)
+		return;
+
+	if (nOperator != TDCCAC_SUBTRACT)
+		return;
+	
+	if (nUnits != TDCU_DAYS)
+		return;
+
+	switch (op.nAttributeID)
+	{
+	case TDCA_DUEDATE:
+		if (CDateHelper::DateHasTime(dValue))
+			return;
+		break;
+
+	case TDCA_TODAY:
+		ASSERT(!CDateHelper::DateHasTime(dValue));
+		break;
+
+	default:
+		return;
+	}
+
+	if (m_data.m_aCustomAttribDefs.GetCalculationOperandDataType(opOther) != TDCCA_DATE)
+		return;
+
+	dValue++; // Beginning of next day => End of current day
 }
 
 BOOL CTDCTaskCalculator::GetSecondCustomAttributeOperandValue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTECALCULATION& calc, double& dValue, TDC_UNITS nUnits, BOOL bAggregated) const
@@ -3578,7 +3597,12 @@ BOOL CTDCTaskCalculator::GetSecondCustomAttributeOperandValue(const TODOITEM* pT
 	}
 
 	// else built-in attribute
-	return GetTaskCustomAttributeOperandValue(pTDI, pTDS, calc.opSecond.nAttributeID, dValue, nUnits, bAggregated);
+	if (!GetTaskCustomAttributeOperandValue(pTDI, pTDS, calc.opSecond.nAttributeID, dValue, nUnits, bAggregated))
+		return FALSE;
+
+	AdjustOperandValueForEndOfDay(calc.opSecond, calc.nOperator, calc.opFirst, dValue, nUnits);
+
+	return TRUE;
 }
 
 BOOL CTDCTaskCalculator::GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_ATTRIBUTE nAttribID, double& dValue, TDC_UNITS nUnits, BOOL bAggregated) const
@@ -3723,7 +3747,7 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI
 	TDCCADATA data;
 
 	if (attribDef.IsDataType(TDCCA_CALCULATION))
-		return DoCustomAttributeCalculation(pTDI, pTDS, attribDef.Calculation(), dValue, nUnits, bAggregated);
+		return DoCustomAttributeCalculation(pTDI, pTDS, attribDef.Calculation(), dValue, nUnits, bAggregated); // SEMI-RECURSIVE CALL
 
 	// else
 	if (pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data))

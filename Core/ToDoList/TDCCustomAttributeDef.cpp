@@ -1286,15 +1286,6 @@ BOOL CTDCCustomAttribDefinitionArray::AnyCalculationUsesAnyAttribute(const CTDCA
 	return FALSE;
 }
 
-TDC_ATTRIBUTE CTDCCustomAttribDefinitionArray::GetCalculationOperandAttributeID(const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& op) const
-{
-	if (op.sCustAttribID.IsEmpty())
-		return op.nAttributeID;
-
-	// TODO
-	return TDCA_CUSTOMATTRIB;
-}
-
 TDC_ATTRIBUTE CTDCCustomAttribDefinitionArray::GetAttributeID(TDC_COLUMN nCustColID) const
 {
 	return GetDefinition(nCustColID).GetAttributeID();
