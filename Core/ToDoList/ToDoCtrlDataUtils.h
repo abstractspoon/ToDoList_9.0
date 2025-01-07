@@ -131,6 +131,12 @@ protected:
 	int GetTaskLeafCount(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bIncludeDone, CDWordSet& mapProcessedIDs) const;
 	const TODOITEM* GetLastModifiedTask(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CDWordSet& mapProcessedIDs) const;
 
+	void AdjustOperandValueForEndOfDay(const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& op, 
+									   TDCCA_CALC_OPERATOR nOperator,
+									   const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& opOther,
+									   double& dValue, 
+									   TDC_UNITS nUnits) const;
+
 	static double GetLatestDate(double dDate1, double dDate2, BOOL bNoTimeIsEndOfDay);
 	static double GetEarliestDate(double dDate1, double dDate2, BOOL bNoTimeIsEndOfDay);
 };
