@@ -26,12 +26,13 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // COwnerdrawComboBoxBase
 
-COwnerdrawComboBoxBase::COwnerdrawComboBoxBase(int nDefMinVisible) 
+COwnerdrawComboBoxBase::COwnerdrawComboBoxBase(int nDefMinVisible, int nItemIndentBelowHeadings) 
 	: 
 	m_nMaxTextWidth(-1),
 	m_nDefMinVisible(nDefMinVisible),
 	m_nNumHeadings(0),
-	m_bHasExtItemData(FALSE)
+	m_bHasExtItemData(FALSE),
+	m_nItemIndentBelowHeadings(nItemIndentBelowHeadings)
 {
 	if (m_nDefMinVisible <= 0)
 		m_nDefMinVisible = 30;
@@ -97,6 +98,11 @@ int COwnerdrawComboBoxBase::SetHeadingItem(int nItem, BOOL bHeading)
 
 	pItemData->bHeading = bHeading;
 	return CB_OKAY;
+}
+
+void COwnerdrawComboBoxBase::SetItemIndentBelowHeadings(int nIndent)
+{
+	m_nItemIndentBelowHeadings = nIndent;
 }
 
 BOOL COwnerdrawComboBoxBase::IsHeadingItem(int nItem) const
@@ -184,7 +190,7 @@ void COwnerdrawComboBoxBase::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 
 	if (bListItem && m_nNumHeadings && !IsHeadingItem(nItem))
 	{
-		rItem.left += rItem.Height();
+		rItem.left += m_nItemIndentBelowHeadings;
 	}
 
 	CString sText;
