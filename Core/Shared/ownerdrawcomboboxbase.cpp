@@ -29,13 +29,11 @@ static char THIS_FILE[] = __FILE__;
 COwnerdrawComboBoxBase::COwnerdrawComboBoxBase(int nDefMinVisible, int nItemIndentBelowHeadings) 
 	: 
 	m_nMaxTextWidth(-1),
-	m_nDefMinVisible(nDefMinVisible),
+	m_nDefMinVisible(nDefMinVisible <= 0 ? 30 : nDefMinVisible),
 	m_nNumHeadings(0),
 	m_bHasExtItemData(FALSE),
 	m_nItemIndentBelowHeadings(nItemIndentBelowHeadings)
 {
-	if (m_nDefMinVisible <= 0)
-		m_nDefMinVisible = 30;
 }
 
 COwnerdrawComboBoxBase::~COwnerdrawComboBoxBase()
