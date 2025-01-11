@@ -91,7 +91,7 @@ void CTDLFilterComboBox::FillCombo()
 	{
 		if (m_aAdvancedFilterNames.GetSize())
 		{
-			int nHeading = CDialogHelper::AddStringT(*this, _T("Default Filters"), ITEM_HEADING);
+			int nHeading = CDialogHelper::AddStringT(*this, CEnString(IDS_FILTERPLACEHOLDER), ITEM_HEADING);
 			SetHeadingItem(nHeading);
 		}
 
@@ -108,7 +108,7 @@ void CTDLFilterComboBox::FillCombo()
 	{
 		if (m_bShowDefaultFilters)
 		{
-			int nHeading = CDialogHelper::AddStringT(*this, _T("Find Task Filters"), ITEM_HEADING);
+			int nHeading = CDialogHelper::AddStringT(*this, CEnString(IDS_ADVANCEDFILTERPLACEHOLDER), ITEM_HEADING);
 			SetHeadingItem(nHeading);
 		}
 
