@@ -197,6 +197,7 @@ BEGIN_MESSAGE_MAP(CTDLTaskAttributeListCtrl, CInputListCtrl)
 	ON_NOTIFY(NM_KILLFOCUS, IDC_DATE_PICKER, OnDateKillFocus)
 
 	ON_EN_CHANGE(IDC_DEPENDS_EDIT, OnDependsChange)
+	ON_EN_KILLFOCUS(IDC_DEPENDS_EDIT, OnDependsKillFocus)
 	ON_EN_KILLFOCUS(IDC_TIMEPERIOD_EDIT, OnTimePeriodKillFocus)
 	ON_EN_KILLFOCUS(IDC_FILELINK_EDIT, OnSingleFileLinkKillFocus)
 	
@@ -3282,21 +3283,26 @@ void CTDLTaskAttributeListCtrl::NotifyParentEdit(int nRow, LPARAM bUnitsChange)
 void CTDLTaskAttributeListCtrl::OnDependsChange()
 {
 	// Received after a manual edit of the task IDs
-	int nRow = GetCurSel();
-
 	HideControl(m_eDepends);
+
+	int nRow = GetCurSel();
 	SetValueText(nRow, m_eDepends.FormatDependencies());
 }
 
-void CTDLTaskAttributeListCtrl::OnSingleFileLinkChange()
+void CTDLTaskAttributeListCtrl::OnDependsKillFocus()
+{
+	OnDependsChange();
+}
+
+void CTDLTaskAttributeListCtrl::OnSingleFileLinkKillFocus()
 {
 	// Received after a manual edit of the task IDs
-	int nRow = GetCurSel();
-
 	CString sFile;
 	m_eSingleFileLink.GetWindowText(sFile);
 
 	HideControl(m_eSingleFileLink);
+
+	int nRow = GetCurSel();
 	SetValueText(nRow, sFile);
 }
 
