@@ -220,6 +220,7 @@ public:
 	static int FindItemByValue(const CComboBox& combo, int nValue);
 	static BOOL SetAutoComboReadOnly(CComboBox& combo, BOOL bVScroll, BOOL bReadonly = TRUE, int nDropHeight = 200);
 	static void SetComboEditReadonly(CComboBox& combo, BOOL bReadonly = TRUE);
+	static BOOL IsComboEdit(HWND hWnd);
 	static BOOL ComboHasEdit(const CComboBox& combo);
 	static void MoveCombo(CComboBox& combo, const CRect& rNew, int nDropHeight = 200);
 

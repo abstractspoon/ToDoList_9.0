@@ -734,6 +734,13 @@ BOOL CDialogHelper::ComboHasEdit(const CComboBox& combo)
 	return (NULL != combo.GetDlgItem(1001));
 }
 
+BOOL CDialogHelper::IsComboEdit(HWND hWnd)
+{
+	return ((::GetDlgCtrlID(hWnd) == 1001) &&
+			CWinClasses::IsEditControl(hWnd) &&
+			CWinClasses::IsComboBox(::GetParent(hWnd)));
+}
+
 void CDialogHelper::MoveCombo(CComboBox& combo, const CRect& rNew, int nDropHeight)
 {
 	// don't move if nothing's changed
