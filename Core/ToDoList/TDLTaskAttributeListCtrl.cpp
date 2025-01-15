@@ -20,6 +20,7 @@
 #include "..\shared\WndPrompt.h"
 #include "..\shared\Themed.h"
 #include "..\Shared\DateHelper.h"
+#include "..\Shared\WinClasses.h"
 
 #ifdef _DEBUG
 #	include "..\shared\ScopedTimer.h"
@@ -108,7 +109,7 @@ const int TIMEPERIOD_DECPLACES = 6; // Preserve full(ish) precision
 
 const TCHAR NEWLINE = '\n';
 
-const LPCTSTR TIMEOFDAY_VARIES = _T("-1");
+const LPCTSTR DATETIME_VARIES = _T("-1");
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -196,8 +197,8 @@ BEGIN_MESSAGE_MAP(CTDLTaskAttributeListCtrl, CInputListCtrl)
 	ON_NOTIFY(NM_KILLFOCUS, IDC_DATE_PICKER, OnDateKillFocus)
 
 	ON_EN_CHANGE(IDC_DEPENDS_EDIT, OnDependsChange)
-	ON_EN_KILLFOCUS(IDC_TIMEPERIOD_EDIT, OnTimePeriodChange)
-	ON_EN_KILLFOCUS(IDC_FILELINK_EDIT, OnSingleFileLinkChange)
+	ON_EN_KILLFOCUS(IDC_TIMEPERIOD_EDIT, OnTimePeriodKillFocus)
+	ON_EN_KILLFOCUS(IDC_FILELINK_EDIT, OnSingleFileLinkKillFocus)
 	
 	ON_CBN_SELENDOK(IDC_TIME_PICKER, OnTimeOfDaySelEndOK)
 
@@ -1251,8 +1252,8 @@ else bValueVaries = TRUE; }
 #define GETMULTIVALUE_DATE(DT, ANDTIME)							\
 { COleDateTime value;											\
 if (m_multitasker.GetTasksDate(m_aSelectedTaskIDs, DT, value))	\
-sValue = FormatDate(value, ANDTIME);							\
-else bValueVaries = TRUE; }
+{ sValue = FormatDate(value, ANDTIME); }						\
+else { sValue = DATETIME_VARIES; bValueVaries = TRUE; } }
 
 // -----------------------------------------------------------------------------------------
 
@@ -1260,7 +1261,7 @@ else bValueVaries = TRUE; }
 { COleDateTime value;											\
 if (m_multitasker.GetTasksDate(m_aSelectedTaskIDs, DT, value))	\
 { sValue = FormatTime(value, TRUE); }							\
-else { sValue = TIMEOFDAY_VARIES; bValueVaries = TRUE; } }
+else { sValue = DATETIME_VARIES; bValueVaries = TRUE; } }
 
 // -----------------------------------------------------------------------------------------
 
@@ -2550,7 +2551,7 @@ void CTDLTaskAttributeListCtrl::PrepareDatePicker(int nRow, TDC_ATTRIBUTE nFallb
 {
 	CString sValue = GetItemText(nRow, VALUE_COL);
 
-	if (sValue.IsEmpty() && 
+	if ((sValue.IsEmpty() || (sValue == DATETIME_VARIES)) && 
 		(nFallbackDate != TDCA_NONE) && 
 		(TDC::MapAttributeToDate(nFallbackDate) != TDCD_NONE))
 	{
@@ -2571,7 +2572,7 @@ void CTDLTaskAttributeListCtrl::PrepareTimeOfDayCombo(int nRow)
 {
 	CString sValue = GetItemText(nRow, VALUE_COL);
 
-	if (sValue.IsEmpty() || (sValue == TIMEOFDAY_VARIES))
+	if (sValue.IsEmpty() || (sValue == DATETIME_VARIES))
 		m_cbTimeOfDay.Set24HourTime(-1);
 	else
 		m_cbTimeOfDay.Set24HourTime(CTimeHelper::DecodeClockTime(sValue));
@@ -3166,17 +3167,8 @@ void CTDLTaskAttributeListCtrl::OnComboCloseUp(UINT nCtrlID)
 	// the edit field to close the combo, DON'T hide the combo
 	CWnd* pEdit = pCombo->GetDlgItem(1001);
 
-	if (pEdit && Misc::IsKeyPressed(VK_LBUTTON))
-	{
-		CPoint ptMsg(GetCurrentMessage()->pt);
-		pEdit->ScreenToClient(&ptMsg);
-
-		CRect rEdit;
-		pEdit->GetClientRect(rEdit);
-
-		if (rEdit.PtInRect(ptMsg))
-			return;
-	}
+	if (pEdit && CDialogHelper::IsMouseDownInWindow(*pEdit))
+		return;
 
 	// All else
 	HideControl(*pCombo);
@@ -3233,7 +3225,7 @@ void CTDLTaskAttributeListCtrl::OnComboEditChange(UINT nCtrlID)
 
 			// If we've got multiple different values, DON'T notify
 			// our parent if the cell text has not actually changed
-			if (RowValueVaries(nRow) && (GetItemText(nRow, VALUE_COL) == TIMEOFDAY_VARIES))
+			if (RowValueVaries(nRow) && (GetItemText(nRow, VALUE_COL) == DATETIME_VARIES))
 			{
 				return;
 			}
@@ -3321,7 +3313,7 @@ BOOL CTDLTaskAttributeListCtrl::SetValueText(int nRow, const CString& sNewText, 
 	return TRUE;
 }
 
-void CTDLTaskAttributeListCtrl::OnTimePeriodChange()
+void CTDLTaskAttributeListCtrl::OnTimePeriodKillFocus()
 {
 	HideControl(m_eTimePeriod);
 	m_eTimePeriod.DeleteButton(ID_BTN_ADDLOGGEDTIME);
@@ -3372,8 +3364,25 @@ void CTDLTaskAttributeListCtrl::OnDateCloseUp(NMHDR* pNMHDR, LRESULT* pResult)
 	UNREFERENCED_PARAMETER(pNMHDR);
 	ASSERT(pNMHDR->idFrom == IDC_DATE_PICKER);
 
+	// If the field has already been hidden by the base class
+	// we can ignore this
+	if (!m_datePicker.IsWindowVisible())
+		return;
+
+	// If the use clicked in the date field DON'T hide it
+	if (CDialogHelper::IsMouseDownInWindow(m_datePicker))
+		return;
+
 	HideControl(m_datePicker); 
-	NotifyParentEdit(GetCurSel());
+
+	// If we've got multiple different values, DON'T notify
+	// our parent if the cell text has not actually changed
+	int nRow = GetCurSel();
+
+	if (RowValueVaries(nRow) && (GetItemText(nRow, VALUE_COL) == DATETIME_VARIES))
+		return;
+	
+	NotifyParentEdit(nRow);
 
 	*pResult = 0;
 }
