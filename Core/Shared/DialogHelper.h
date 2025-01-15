@@ -271,7 +271,8 @@ public:
 	static void InvalidateChild(const CWnd* pChild, BOOL bErase = TRUE, BOOL bUpdate = FALSE);
 
 	static BOOL TrackMouseLeave(HWND hWnd, BOOL bEnable = TRUE, BOOL bIncludeNonClient = TRUE);
-	
+	static BOOL IsMouseDownInWindow(HWND hWnd);
+
 	// helpers for updating only a single item
 	static BOOL UpdateDataEx(CWnd* pWnd, int nIDC, BYTE& value, BOOL bSaveAndValidate = TRUE);
 	static BOOL UpdateDataEx(CWnd* pWnd, int nIDC, short& value, BOOL bSaveAndValidate = TRUE);
