@@ -199,6 +199,7 @@ protected:
 	afx_msg void OnDependsChange();
 	afx_msg void OnTimePeriodChange();
 	afx_msg void OnSingleFileLinkChange();
+	afx_msg void OnTimeOfDaySelEndOK();
 
 	afx_msg void OnComboKillFocus(UINT nCtrlID);
 	afx_msg void OnComboCloseUp(UINT nCtrlID);

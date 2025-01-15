@@ -108,6 +108,8 @@ const int TIMEPERIOD_DECPLACES = 6; // Preserve full(ish) precision
 
 const TCHAR NEWLINE = '\n';
 
+const LPCTSTR TIMEOFDAY_VARIES = _T("-1");
+
 /////////////////////////////////////////////////////////////////////////////
 
 enum 
@@ -196,6 +198,8 @@ BEGIN_MESSAGE_MAP(CTDLTaskAttributeListCtrl, CInputListCtrl)
 	ON_EN_CHANGE(IDC_DEPENDS_EDIT, OnDependsChange)
 	ON_EN_KILLFOCUS(IDC_TIMEPERIOD_EDIT, OnTimePeriodChange)
 	ON_EN_KILLFOCUS(IDC_FILELINK_EDIT, OnSingleFileLinkChange)
+	
+	ON_CBN_SELENDOK(IDC_TIME_PICKER, OnTimeOfDaySelEndOK)
 
 	ON_CONTROL_RANGE(CBN_KILLFOCUS, 0, 0xffff, OnComboKillFocus)
 	ON_CONTROL_RANGE(CBN_CLOSEUP, 0, 0xffff, OnComboCloseUp)
@@ -1255,8 +1259,8 @@ else bValueVaries = TRUE; }
 #define GETMULTIVALUE_TIME(DT)									\
 { COleDateTime value;											\
 if (m_multitasker.GetTasksDate(m_aSelectedTaskIDs, DT, value))	\
-sValue = FormatTime(value, TRUE);								\
-else bValueVaries = TRUE; }
+{ sValue = FormatTime(value, TRUE); }							\
+else { sValue = TIMEOFDAY_VARIES; bValueVaries = TRUE; } }
 
 // -----------------------------------------------------------------------------------------
 
@@ -1481,8 +1485,8 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(int nRow)
 		break;
 	}
 
-	// To distinguish between empty values and multiple differing values
-	// we use the item image index
+	// Use the item image index To distinguish between 
+	// empty values and multiple differing values
 	SetItemImage(nRow, (bValueVaries ? VALUE_VARIES : -1));
 	SetItemText(nRow, VALUE_COL, sValue);
 }
@@ -2567,7 +2571,7 @@ void CTDLTaskAttributeListCtrl::PrepareTimeOfDayCombo(int nRow)
 {
 	CString sValue = GetItemText(nRow, VALUE_COL);
 
-	if (sValue.IsEmpty())
+	if (sValue.IsEmpty() || (sValue == TIMEOFDAY_VARIES))
 		m_cbTimeOfDay.Set24HourTime(-1);
 	else
 		m_cbTimeOfDay.Set24HourTime(CTimeHelper::DecodeClockTime(sValue));
@@ -3144,21 +3148,51 @@ void CTDLTaskAttributeListCtrl::HideAllControls(const CWnd* pWndIgnore)
 	}
 }
 
+void CTDLTaskAttributeListCtrl::OnTimeOfDaySelEndOK()
+{
+	OnComboEditChange(IDC_TIME_PICKER);
+}
+
 void CTDLTaskAttributeListCtrl::OnComboCloseUp(UINT nCtrlID) 
 { 
 	CWnd* pCombo = GetDlgItem(nCtrlID);
 
-	if (pCombo->GetDlgItem(1001) == NULL) // no edit control
-		HideControl(*pCombo);
+	// If the combo has already been hidden by the base class
+	// we can ignore this
+	if (!pCombo->IsWindowVisible())
+		return;
+
+	// If the combo has an edit field AND the user clicked inside 
+	// the edit field to close the combo, DON'T hide the combo
+	CWnd* pEdit = pCombo->GetDlgItem(1001);
+
+	if (pEdit && Misc::IsKeyPressed(VK_LBUTTON))
+	{
+		CPoint ptMsg(GetCurrentMessage()->pt);
+		pEdit->ScreenToClient(&ptMsg);
+
+		CRect rEdit;
+		pEdit->GetClientRect(rEdit);
+
+		if (rEdit.PtInRect(ptMsg))
+			return;
+	}
+
+	// All else
+	HideControl(*pCombo);
 }
 
 void CTDLTaskAttributeListCtrl::OnComboKillFocus(UINT nCtrlID)
 {
-	// Special case
-	if (nCtrlID == IDC_TIME_PICKER)
-		OnComboEditChange(IDC_TIME_PICKER);
-	else
-		HideControl(*GetDlgItem(nCtrlID));
+	HideControl(*GetDlgItem(nCtrlID));
+
+	// Extra handling
+	switch (nCtrlID)
+	{
+	case IDC_TIME_PICKER:
+		OnComboEditChange(nCtrlID);
+		break;
+	}
 }
 
 void CTDLTaskAttributeListCtrl::OnComboEditChange(UINT nCtrlID)
@@ -3184,11 +3218,28 @@ void CTDLTaskAttributeListCtrl::OnComboEditChange(UINT nCtrlID)
 
 	case IDC_TIME_PICKER:
 		{
-			// Don't hide if dropped-down
-			if (m_cbTimeOfDay.GetDroppedState())
-				return;
+			double dTime = m_cbTimeOfDay.Get24HourTime();
 
-			sNewValue = CTimeHelper::FormatClockTime(m_cbTimeOfDay.Get24HourTime() / 24);
+			if (dTime != 0.0)
+				sNewValue = CTimeHelper::FormatClockTime(dTime / 24);
+
+			// If the combo is visible, use the cell value as a 
+			// scratch pad but WITHOUT notifying the parent
+			if (m_cbTimeOfDay.IsWindowVisible())
+			{
+				SetItemText(nRow, VALUE_COL, sNewValue);
+				return;
+			}
+
+			// If we've got multiple different values, DON'T notify
+			// our parent if the cell text has not actually changed
+			if (RowValueVaries(nRow) && (GetItemText(nRow, VALUE_COL) == TIMEOFDAY_VARIES))
+			{
+				return;
+			}
+
+			// Revert any scratch pad changes before default handling
+			RefreshSelectedTasksValue(nRow);
 		}
 		break;
 
@@ -3262,6 +3313,8 @@ BOOL CTDLTaskAttributeListCtrl::SetValueText(int nRow, const CString& sNewText, 
 	if (sNewText == GetItemText(nRow, VALUE_COL))
 		return FALSE;
 
+	CLockUpdates hr(*this);
+
 	VERIFY(SetItemText(nRow, VALUE_COL, sNewText));
 	NotifyParentEdit(nRow, bUnitsChange);
 
@@ -3299,8 +3352,13 @@ void CTDLTaskAttributeListCtrl::OnCancelEdit()
 		{
 			// If we've been using the cell text as a scratch pad we need 
 			// revert any changes before calling PrepareControl
-			if (pCtrl == &m_datePicker)
+			switch (pCtrl->GetDlgCtrlID())
+			{
+			case IDC_DATE_PICKER:
+			case IDC_TIME_PICKER:
 				RefreshSelectedTasksValue(nRow);
+				break;
+			}
 
 			PrepareControl(*pCtrl, nRow, VALUE_COL);
 		}
@@ -3647,7 +3705,7 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 {
 	LVHITTESTINFO lvHit = { { point.x, point.y }, 0 };
 
-	// Get around const-ness
+	// Get around constness
 	int nRow = (int)::SendMessage(m_hWnd, LVM_SUBITEMHITTEST, 0, (LPARAM)&lvHit);
 	int nCol = lvHit.iSubItem;
 
