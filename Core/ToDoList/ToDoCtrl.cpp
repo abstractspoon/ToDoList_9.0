@@ -1262,13 +1262,9 @@ BOOL CToDoCtrl::EditSelectedTaskColor()
 
 	CEnColorDialog dialog(GetSelectedTaskColor());
 
-	CPreferences prefs;
-	dialog.LoadPreferences(prefs);
-
-	if (dialog.DoModal() != IDOK)
+	if (dialog.DoModal(CPreferences()) != IDOK)
 		return FALSE;
 
-	dialog.SavePreferences(prefs);
 	return SetSelectedTaskColor(dialog.GetColor());
 }
 
@@ -9961,7 +9957,7 @@ BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttribID)
 	case TDCA_PERCENT:		return SetSelectedTaskPercentDone(0);
 	case TDCA_FLAG:			return SetSelectedTaskFlag(FALSE);
 	case TDCA_LOCK:			return SetSelectedTaskLock(FALSE);
-	case TDCA_COLOR:		return SetSelectedTaskColor(0);
+	case TDCA_COLOR:		return SetSelectedTaskColor(CLR_NONE);
 	case TDCA_RECURRENCE:	return SetSelectedTaskRecurrence(TDCRECURRENCE());
 	case TDCA_ICON:			return ClearSelectedTaskIcon();
 		
