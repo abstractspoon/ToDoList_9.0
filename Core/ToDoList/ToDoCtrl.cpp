@@ -10012,6 +10012,7 @@ BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttribID)
 	case TDCA_ID:
 	case TDCA_PARENTID:
 	case TDCA_PATH:
+	case TDCA_TASKNAME:
 		ASSERT(0);
 		return FALSE;
 	}
