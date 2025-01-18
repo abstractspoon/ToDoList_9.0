@@ -1120,6 +1120,7 @@ void CTDLTaskAttributeListCtrl::SetDefaultAutoListData(const TDCAUTOLISTDATA& tl
 void CTDLTaskAttributeListCtrl::SetAutoListData(TDC_ATTRIBUTE nAttribID, const TDCAUTOLISTDATA& tld)
 {
 	m_tldAll.Copy(tld, nAttribID);
+	m_tldAll.AppendUnique(m_tldDefault, nAttribID);
 }
 
 void CTDLTaskAttributeListCtrl::GetAutoListData(TDC_ATTRIBUTE nAttribID, TDCAUTOLISTDATA& tld) const

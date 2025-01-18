@@ -822,10 +822,15 @@ void CToDoCtrl::ShowHideControls()
 		m_ctrlComments.ShowWindow(SW_SHOW);
 		break;
 	}
+
+	EnableDisableControls();
 }
 
 void CToDoCtrl::EnableDisableControls(BOOL bHasSelection)
 {
+	if (bHasSelection == -1)
+		bHasSelection = (GetUpdateControlsItem() && HasSelection());
+
 	EnableDisableComments(bHasSelection);
 
 	if (m_layout.HasMaximiseState(TDCMS_NORMAL) && HasStyle(TDCS_SHOWPROJECTNAME))
@@ -1217,6 +1222,7 @@ void CToDoCtrl::SetDefaultAutoListData(const TDCAUTOLISTDATA& tld)
 {
 	// update the combos before copying over the current defaults
 	m_ctrlAttributes.SetDefaultAutoListData(tld);
+	m_ctrlAttributes.GetAutoListData(TDCA_ALL, m_tldAll);
 
 	m_tldDefault.Copy(tld, TDCA_ALL);
 }
@@ -1262,13 +1268,9 @@ BOOL CToDoCtrl::EditSelectedTaskColor()
 
 	CEnColorDialog dialog(GetSelectedTaskColor());
 
-	CPreferences prefs;
-	dialog.LoadPreferences(prefs);
-
-	if (dialog.DoModal() != IDOK)
+	if (dialog.DoModal(CPreferences()) != IDOK)
 		return FALSE;
 
-	dialog.SavePreferences(prefs);
 	return SetSelectedTaskColor(dialog.GetColor());
 }
 
@@ -4192,7 +4194,10 @@ void CToDoCtrl::BuildTasksForSave(CTaskFile& tasks) const
 void CToDoCtrl::LoadGlobals(const CTaskFile& tasks)
 {
 	if (tasks.GetAutoListData(m_tldAll))
+	{
 		m_ctrlAttributes.SetAutoListData(TDCA_ALL, m_tldAll);
+		UpdateAutoListData();
+	}
 }
 
 void CToDoCtrl::SaveCustomAttributeDefinitions(CTaskFile& tasks, const TDCGETTASKS& filter) const
@@ -9961,7 +9966,7 @@ BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttribID)
 	case TDCA_PERCENT:		return SetSelectedTaskPercentDone(0);
 	case TDCA_FLAG:			return SetSelectedTaskFlag(FALSE);
 	case TDCA_LOCK:			return SetSelectedTaskLock(FALSE);
-	case TDCA_COLOR:		return SetSelectedTaskColor(0);
+	case TDCA_COLOR:		return SetSelectedTaskColor(CLR_NONE);
 	case TDCA_RECURRENCE:	return SetSelectedTaskRecurrence(TDCRECURRENCE());
 	case TDCA_ICON:			return ClearSelectedTaskIcon();
 		
