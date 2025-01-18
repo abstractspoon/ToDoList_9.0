@@ -2122,6 +2122,23 @@ BOOL CDialogHelper::TrackMouseLeave(HWND hWnd, BOOL bEnable, BOOL bIncludeNonCli
 	return _TrackMouseEvent(&tme);
 }
 
+BOOL CDialogHelper::IsMouseDownInWindow(HWND hWnd)
+{
+	ASSERT(hWnd);
+	ASSERT(::IsWindowVisible(hWnd));
+
+	if (!hWnd || !Misc::IsKeyPressed(VK_LBUTTON))
+		return FALSE;
+
+	CPoint ptMsg(::GetMessagePos());
+	::ScreenToClient(hWnd, &ptMsg);
+
+	CRect rWnd;
+	::GetClientRect(hWnd, rWnd);
+
+	return rWnd.PtInRect(ptMsg);
+}
+
 BOOL CDialogHelper::SelectText(const CWnd* pEdit, LPCTSTR szText, int nSearchStart, int nSearchLen)
 {
 	if (!pEdit || !pEdit->GetWindowTextLength())
