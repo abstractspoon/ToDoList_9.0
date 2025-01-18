@@ -2597,11 +2597,14 @@ void CTDLTaskAttributeListCtrl::PrepareTimeOfDayCombo(int nRow)
 void CTDLTaskAttributeListCtrl::PrepareTimePeriodEdit(int nRow)
 {
 	CString sValue = GetItemText(nRow, VALUE_COL);
+
 	TH_UNITS nUnits = THU_NULL;
 	double dValue = 0.0;
-		
-	if (CTimeHelper::DecodeOffset(sValue, dValue, nUnits, FALSE))
-		m_eTimePeriod.SetTime(dValue, nUnits);
+
+	if (!RowValueVaries(nRow))
+		CTimeHelper::DecodeOffset(sValue, dValue, nUnits, FALSE);
+
+	m_eTimePeriod.SetTime(dValue, nUnits);
 }
 
 CString CTDLTaskAttributeListCtrl::GetValueText(TDC_ATTRIBUTE nAttribID) const 
@@ -3132,7 +3135,9 @@ void CTDLTaskAttributeListCtrl::HandleTimePeriodEdit(int nRow, BOOL bBtnClick)
 	if (bBtnClick)
 	{
 		m_eTimePeriod.ShowUnitsPopupMenu(); // modal loop
-		HideControl(m_eTimePeriod);
+
+		if (m_eTimePeriod.HasValidTime())
+			HideControl(m_eTimePeriod);
 	}
 }
 
@@ -3334,15 +3339,24 @@ void CTDLTaskAttributeListCtrl::OnTimePeriodKillFocus()
 	HideControl(m_eTimePeriod);
 	m_eTimePeriod.DeleteButton(ID_BTN_ADDLOGGEDTIME);
 	m_eTimePeriod.DeleteButton(ID_BTN_TIMETRACK);
+	
+	if (!m_eTimePeriod.HasValidTime())
+		return;
 
-	int nRow = GetCurSel();
-
-	TDCTIMEPERIOD tpCur(GetItemText(nRow, VALUE_COL));
 	TDCTIMEPERIOD tpNew(m_eTimePeriod.GetTime(), m_eTimePeriod.GetUnits());
 
-	BOOL bUnitsChange = ((tpCur.dAmount > 0.0) && 
+	int nRow = GetCurSel();
+	CString sCurTime = GetItemText(nRow, VALUE_COL);
+	BOOL bUnitsChange = sCurTime.IsEmpty();
+
+	if (!bUnitsChange)
+	{
+		TDCTIMEPERIOD tpCur(sCurTime);
+
+		bUnitsChange = ((tpCur.dAmount > 0.0) &&
 						(tpNew.nUnits != tpCur.nUnits) &&
 						(Misc::Format(tpNew.dAmount, TIMEPERIOD_DECPLACES) == Misc::Format(tpCur.dAmount, TIMEPERIOD_DECPLACES)));
+	}
 
 	SetValueText(nRow, tpNew.Format(TIMEPERIOD_DECPLACES), bUnitsChange);
 }
