@@ -2412,12 +2412,21 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 	case TDCA_PRIORITY:
 		{
 			m_cbPriority.SetColors(m_aPriorityColors);
-			m_cbPriority.SetSelectedPriority(_ttoi(GetItemText(nRow, nCol)));
+
+			if (RowValueVaries(nRow))
+				m_cbPriority.SetCurSel(CB_ERR);
+			else
+				m_cbPriority.SetSelectedPriority(_ttoi(GetItemText(nRow, nCol)));
 		}
 		break;
 
 	case TDCA_RISK:
-		m_cbRisk.SetSelectedRisk(_ttoi(GetItemText(nRow, nCol)));
+		{
+			if (RowValueVaries(nRow))
+				m_cbRisk.SetCurSel(CB_ERR);
+			else
+				m_cbRisk.SetSelectedRisk(_ttoi(GetItemText(nRow, nCol)));
+		}
 		break;
 
 	case TDCA_TIMEESTIMATE:
