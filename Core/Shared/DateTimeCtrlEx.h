@@ -49,8 +49,9 @@ public:
 
 	DWORD GetMonthCalStyle() const;
 	BOOL IsCalendarVisible() const;
-	BOOL GetPickerInfo(DATETIMEPICKERINFO& dtpi) const;
 	BOOL IsDateSet() const;
+	CRect GetDropButtonRect() const;
+	CRect GetCheckboxRect() const;
 
 // Attributes
 protected:
@@ -93,8 +94,7 @@ protected:
 
 protected:
 	BOOL IsCheckboxFocused() const;
-	CRect GetDropButtonRect() const;
-	CRect GetCheckboxRect() const;
+	BOOL GetPickerInfo(DATETIMEPICKERINFO& dtpi) const;
 	void ResetCalendarHandling();
 
 };
