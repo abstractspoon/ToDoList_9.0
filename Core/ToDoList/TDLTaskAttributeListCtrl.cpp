@@ -3401,7 +3401,21 @@ void CTDLTaskAttributeListCtrl::OnDateCloseUp(NMHDR* pNMHDR, LRESULT* pResult)
 
 	// If the use clicked in the date field DON'T hide it
 	if (CDialogHelper::IsMouseDownInWindow(m_datePicker))
-		return;
+	{
+		DATETIMEPICKERINFO dtpi = { 0 };
+
+		if (m_datePicker.GetPickerInfo(dtpi))
+		{
+			CPoint ptMsg(::GetMessagePos());
+			m_datePicker.ScreenToClient(&ptMsg);
+
+			if (!::PtInRect(&dtpi.rcButton, ptMsg) &&
+				!::PtInRect(&dtpi.rcCheck, ptMsg))
+			{
+				return;
+			}
+		}
+	}
 
 	HideControl(m_datePicker); 
 
@@ -3436,7 +3450,8 @@ void CTDLTaskAttributeListCtrl::OnDateChange(NMHDR* pNMHDR, LRESULT* pResult)
 		{
 			// Clear the text and end the edit, triggering a parent notification
 			VERIFY(SetItemText(GetCurSel(), VALUE_COL, _T("")));
-			HideControl(m_datePicker);
+			
+			OnDateCloseUp(pNMHDR, pResult);
 		}
 		else
 		{
