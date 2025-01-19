@@ -43,12 +43,14 @@ public:
 	CDateTimeCtrlEx(DWORD dwMonthCalStyle = MCS_WEEKNUMBERS);
 
 	DWORD SetMonthCalStyle(DWORD dwStyle);
-	DWORD GetMonthCalStyle() const;
-	BOOL IsCalendarVisible() const;
 	void EnableInlineEditing(BOOL bEnable = TRUE) { m_bEnableInlineEditing = bEnable; }
 	void ShowCalendarOnCompleting(BOOL bShow = TRUE) { m_bShowCalendarOnCompleting = bShow; }
 	BOOL ShowSeconds(BOOL bShow);
+
+	DWORD GetMonthCalStyle() const;
+	BOOL IsCalendarVisible() const;
 	BOOL GetPickerInfo(DATETIMEPICKERINFO& dtpi) const;
+	BOOL IsDateSet() const;
 
 // Attributes
 protected:
@@ -81,7 +83,6 @@ protected:
 	afx_msg void OnSysKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 	//}}AFX_MSG
-	afx_msg int OnCreate(LPCREATESTRUCT pCreate);
 	afx_msg void OnPaint();
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
 	afx_msg void OnKillFocus(CWnd* pNewWnd);
@@ -92,7 +93,6 @@ protected:
 
 protected:
 	BOOL IsCheckboxFocused() const;
-	BOOL IsDateSet() const;
 	CRect GetDropButtonRect() const;
 	CRect GetCheckboxRect() const;
 	void ResetCalendarHandling();

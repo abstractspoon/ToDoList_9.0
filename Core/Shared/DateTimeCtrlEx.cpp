@@ -70,7 +70,6 @@ BEGIN_MESSAGE_MAP(CDateTimeCtrlEx, CDateTimeCtrl)
 	ON_WM_SYSKEYDOWN()
 	ON_WM_KEYDOWN()
 	//}}AFX_MSG_MAP
-	ON_WM_CREATE()
 	ON_WM_PAINT()
 	ON_WM_KILLFOCUS()
 	ON_WM_SETFOCUS()
@@ -113,17 +112,6 @@ BOOL CDateTimeCtrlEx::IsCalendarVisible() const
 	}
 
 	return FALSE;
-}
-
-int CDateTimeCtrlEx::OnCreate(LPCREATESTRUCT pCreate)
-{
-// 	if (m_dwMonthCalStyle)
-// 	{
-// 		SetMonthCalStyle(m_dwMonthCalStyle);
-// 		m_dwMonthCalStyle = 0;
-// 	}
-
-	return CDateTimeCtrl::OnCreate(pCreate);
 }
 
 void CDateTimeCtrlEx::PreSubclassWindow()
