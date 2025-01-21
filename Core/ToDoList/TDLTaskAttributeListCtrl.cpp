@@ -9,6 +9,7 @@
 #include "tdcstatic.h"
 #include "tdcstruct.h"
 #include "tdcmapping.h"
+#include "TDLTaskIconDlg.h"
 
 #include "..\shared\EnMenu.h"
 #include "..\shared\GraphicsMisc.h"
@@ -1801,7 +1802,19 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 		return;
 
 	case TDCA_ICON:
-		DrawIcon(pDC, sText, rText, FALSE);
+		if (DrawIcon(pDC, sText, rText, FALSE))
+		{
+			CString sIconName(CTDLTaskIconDlg::GetUserIconName(sText));
+
+			if (!sIconName.IsEmpty())
+			{
+				CRect rName(rText);
+				rName.left += (ICON_SIZE + 2);
+
+				pDC->SetTextColor(crText);
+				pDC->DrawText(sIconName, rName, nDrawTextFlags);
+			}
+		}
 		return;
 
 	case TDCA_COST:
@@ -1928,25 +1941,49 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 				return;
 
 			case TDCCA_ICON:
-				if (pDef->IsMultiList())
 				{
-					CString sMatched(sText), sUnused;
-					Misc::Split(sMatched, sUnused, '|');
-
-					CStringArray aIcons;
-					int nNumIcons = Misc::Split(sMatched, aIcons);
-
+					CString sIconName;
 					CRect rIcon(rText);
 
-					for (int nIcon = 0; nIcon < nNumIcons; nIcon++)
+					if (pDef->IsMultiList())
 					{
-						if (DrawIcon(pDC, aIcons[nIcon], rIcon, FALSE))
-							rIcon.left += (ICON_SIZE + 2);
+						CString sMatched(sText), sUnused;
+						Misc::Split(sMatched, sUnused, '|');
+
+						CStringArray aIcons;
+						int nNumIcons = Misc::Split(sMatched, aIcons);
+
+						for (int nIcon = 0; nIcon < nNumIcons; nIcon++)
+						{
+							if (DrawIcon(pDC, aIcons[nIcon], rIcon, FALSE))
+								rIcon.left += (ICON_SIZE + 2);
+						}
+
+						if (nNumIcons == 1)
+						{
+							if (!pDef->GetUserIconName(sText, sIconName))
+								sIconName = CTDLTaskIconDlg::GetUserIconName(sText);
+						}
 					}
-				}
-				else
-				{
-					DrawIcon(pDC, sText, rText, FALSE);
+					else
+					{
+						CString sImage;
+						
+						if (TDCCUSTOMATTRIBUTEDEFINITION::DecodeImageTag(sText, sImage, sIconName) &&
+							DrawIcon(pDC, sImage, rIcon, FALSE))
+						{
+							if (sIconName.IsEmpty() && (!pDef->IsList() || !pDef->GetUserIconName(sText, sIconName)))
+								sIconName = CTDLTaskIconDlg::GetUserIconName(sText);
+
+							rIcon.left += (ICON_SIZE + 2);
+						}
+					}
+
+					if (!sIconName.IsEmpty())
+					{
+						pDC->SetTextColor(crText);
+						pDC->DrawText(sIconName, rIcon, nDrawTextFlags);
+					}
 				}
 				return;
 
