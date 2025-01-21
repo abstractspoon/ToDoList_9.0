@@ -205,7 +205,7 @@ BEGIN_MESSAGE_MAP(CTDLTaskAttributeListCtrl, CInputListCtrl)
 
 	ON_CONTROL_RANGE(CBN_KILLFOCUS, 0, 0xffff, OnComboKillFocus)
 	ON_CONTROL_RANGE(CBN_CLOSEUP, 0, 0xffff, OnComboCloseUp)
-	ON_CONTROL_RANGE(CBN_SELCHANGE, 0, 0xffff, OnComboEditChange)
+	ON_CONTROL_RANGE(CBN_SELCHANGE, 0, 0xffff, OnComboSelChange)
 
 	ON_NOTIFY_REFLECT(LVN_ENDLABELEDIT, OnTextEditOK)
 
@@ -3167,24 +3167,24 @@ void CTDLTaskAttributeListCtrl::HideAllControls(const CWnd* pWndIgnore)
 
 void CTDLTaskAttributeListCtrl::OnTimeOfDaySelEndOK()
 {
-	OnComboEditChange(IDC_TIME_PICKER);
+	OnComboSelChange(IDC_TIME_PICKER);
 }
 
 void CTDLTaskAttributeListCtrl::OnComboCloseUp(UINT nCtrlID) 
 { 
 	CWnd* pCombo = GetDlgItem(nCtrlID);
 
-	// If the combo has already been hidden by the base class
-	// we can ignore this
-	if (!pCombo->IsWindowVisible())
-		return;
+	// Note: our base class may already have hidden 
+	// the combo so we have to check first
+	if (pCombo->IsWindowVisible())
+	{
+		// If the combo has an edit field AND the user clicked inside 
+		// the edit field to close the combo, DON'T hide the combo
+		CWnd* pEdit = pCombo->GetDlgItem(1001);
 
-	// If the combo has an edit field AND the user clicked inside 
-	// the edit field to close the combo, DON'T hide the combo
-	CWnd* pEdit = pCombo->GetDlgItem(1001);
-
-	if (pEdit && CDialogHelper::IsMouseDownInWindow(*pEdit))
-		return;
+		if (pEdit && CDialogHelper::IsMouseDownInWindow(*pEdit))
+			return;
+	}
 
 	// All else
 	HideControl(*pCombo);
@@ -3198,12 +3198,12 @@ void CTDLTaskAttributeListCtrl::OnComboKillFocus(UINT nCtrlID)
 	switch (nCtrlID)
 	{
 	case IDC_TIME_PICKER:
-		OnComboEditChange(nCtrlID);
+		OnComboSelChange(nCtrlID);
 		break;
 	}
 }
 
-void CTDLTaskAttributeListCtrl::OnComboEditChange(UINT nCtrlID)
+void CTDLTaskAttributeListCtrl::OnComboSelChange(UINT nCtrlID)
 {
 	int nRow = GetCurSel();
 	CString sNewValue;
@@ -3269,11 +3269,16 @@ void CTDLTaskAttributeListCtrl::OnComboEditChange(UINT nCtrlID)
 		break;
 
 	case IDC_CUSTOMICON_COMBO:
+		if (m_cbCustomIcons.IsMultiSelectionEnabled())
 		{
 			CStringArray aMatched, aMixed;
 			m_cbCustomIcons.GetChecked(aMatched, aMixed);
 
 			sNewValue = FormatMultiSelItems(aMatched, aMixed);
+		}
+		else
+		{
+			sNewValue = CDialogHelper::GetSelectedItem(m_cbCustomIcons);
 		}
 		break;
 
