@@ -1802,17 +1802,11 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 		return;
 
 	case TDCA_ICON:
-		if (DrawIcon(pDC, sText, rText, FALSE))
 		{
+			CRect rIcon(rText);
 
-			if (!sIconName.IsEmpty())
-			{
-				CRect rName(rText);
-				rName.left += (ICON_SIZE + 2);
-
-				pDC->SetTextColor(crText);
-				pDC->DrawText(sIconName, rName, nDrawTextFlags);
-			}
+			if (DrawIcon(pDC, sText, rIcon, FALSE))
+				CInputListCtrl::DrawCellText(pDC, nRow, nCol, rIcon, CTDLTaskIconDlg::GetUserIconName(sText), crText, nDrawTextFlags);
 		}
 		return;
 
@@ -1875,11 +1869,9 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 			for (int nFile = 0; nFile < nNumFiles; nFile++)
 			{
 				CString sFile = aFiles[nFile];
+				DrawIcon(pDC, sFile, rFile, TRUE);
 
-				if (DrawIcon(pDC, sFile, rFile, TRUE))
-					rFile.left += (ICON_SIZE + 2);
-
-				if (!TDCTASKLINK::IsTaskLink(aFiles[0], TRUE))
+				if (!TDCTASKLINK::IsTaskLink(sFile, TRUE))
 					sFile = FileMisc::GetFileNameFromPath(sFile);
 
 				if (nFile < (nNumFiles - 1))
@@ -1908,8 +1900,7 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 				CString sTitle = m_formatter.GetTaskTitlePath(dwDependsID, (TDCTF_TITLEONLY | TDCTF_TRAILINGID));
 				CString sIcon = m_data.GetTaskIcon(dwDependsID);
 	
-				if (DrawIcon(pDC, m_data.GetTaskIcon(dwDependsID), rTitle, FALSE))
-					rTitle.left += (ICON_SIZE + 2);
+				DrawIcon(pDC, m_data.GetTaskIcon(dwDependsID), rTitle, FALSE);
 
 				if (nDepend < (nNumDepends - 1))
 					sTitle += Misc::GetListSeparator() + ' ';
@@ -1931,9 +1922,7 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 			case TDCCA_FILELINK:
 				{
 					CRect rRest(rText);
-
-					if (DrawIcon(pDC, sText, rText, TRUE))
-						rRest.left += (ICON_SIZE + 2);
+					DrawIcon(pDC, sText, rRest, TRUE);
 	
 					CInputListCtrl::DrawCellText(pDC, nRow, nCol, rRest, FileMisc::GetFileNameFromPath(sText), crText, nDrawTextFlags);
 				}
@@ -1953,10 +1942,7 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 						int nNumIcons = Misc::Split(sMatched, aIcons);
 
 						for (int nIcon = 0; nIcon < nNumIcons; nIcon++)
-						{
-							if (DrawIcon(pDC, aIcons[nIcon], rIcon, FALSE))
-								rIcon.left += (ICON_SIZE + 2);
-						}
+							DrawIcon(pDC, aIcons[nIcon], rIcon, FALSE);
 
 						if (nNumIcons == 1)
 						{
@@ -1973,16 +1959,10 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 						{
 							if (sIconName.IsEmpty() && (!pDef->IsList() || !pDef->GetListIconName(sText, sIconName)))
 								sIconName = CTDLTaskIconDlg::GetUserIconName(sText);
-
-							rIcon.left += (ICON_SIZE + 2);
 						}
 					}
 
-					if (!sIconName.IsEmpty())
-					{
-						pDC->SetTextColor(crText);
-						pDC->DrawText(sIconName, rIcon, nDrawTextFlags);
-					}
+					CInputListCtrl::DrawCellText(pDC, nRow, nCol, rIcon, sIconName, crText, nDrawTextFlags);
 				}
 				return;
 
@@ -2015,26 +1995,33 @@ CPoint CTDLTaskAttributeListCtrl::GetIconPos(const CRect& rText)
 	return CPoint(rText.left - 1, rText.top + ((rText.Height() - ICON_SIZE) / 2));
 }
 
-BOOL CTDLTaskAttributeListCtrl::DrawIcon(CDC* pDC, const CString& sIcon, const CRect& rText, BOOL bIconIsFile)
+BOOL CTDLTaskAttributeListCtrl::DrawIcon(CDC* pDC, const CString& sIcon, CRect& rIcon, BOOL bIconIsFile)
 {
 	if (sIcon.IsEmpty())
 		return FALSE;
 
-	CPoint ptIcon(GetIconPos(rText));
+	CPoint ptIcon(GetIconPos(rIcon));
+	BOOL bDrawn = FALSE;
 
 	if (bIconIsFile)
 	{
-		return CFileEdit::DrawFileIcon(pDC, 
-									   sIcon,
-									   ptIcon, 
-									   m_iconCache,
-									   this,
-									   m_sCurrentFolder,
-									   m_data.HasStyle(TDCS_SHOWFILELINKTHUMBNAILS));
+		bDrawn = CFileEdit::DrawFileIcon(pDC,
+										 sIcon,
+										 ptIcon,
+										 m_iconCache,
+										 this,
+										 m_sCurrentFolder,
+										 m_data.HasStyle(TDCS_SHOWFILELINKTHUMBNAILS));
+	}
+	else
+	{
+		bDrawn = m_ilIcons.Draw(pDC, sIcon, ptIcon, ILD_TRANSPARENT);
 	}
 
-	// else
-	return m_ilIcons.Draw(pDC, sIcon, GetIconPos(rText), ILD_TRANSPARENT);
+	if (bDrawn)
+		rIcon.left += (ICON_SIZE + 2);
+
+	return bDrawn;
 }
 
 void CTDLTaskAttributeListCtrl::OnTextEditOK(NMHDR* pNMHDR, LRESULT* pResult)
