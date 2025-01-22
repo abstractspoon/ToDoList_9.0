@@ -1336,7 +1336,7 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(int nRow)
 			CStringArray aFileLinks;
 			
 			if (m_multitasker.GetTasksFileLinks(m_aSelectedTaskIDs, aFileLinks))
-				sValue = Misc::FormatArray(aFileLinks);
+				sValue = FormatValueArray(aFileLinks);
 			else
 				bValueVaries = TRUE;
 		}
@@ -1862,7 +1862,7 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 	case TDCA_FILELINK:
 		{
 			CStringArray aFiles;
-			int nNumFiles = Misc::Split(sText, aFiles);
+			int nNumFiles = SplitValueArray(sText, aFiles);
 
 			CRect rFile(rText);
 
@@ -1939,7 +1939,7 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 						Misc::Split(sMatched, sUnused, '|');
 
 						CStringArray aIcons;
-						int nNumIcons = Misc::Split(sMatched, aIcons);
+						int nNumIcons = SplitValueArray(sMatched, aIcons);
 
 						for (int nIcon = 0; nIcon < nNumIcons; nIcon++)
 							DrawIcon(pDC, aIcons[nIcon], rIcon, FALSE);
@@ -2097,7 +2097,7 @@ int CTDLTaskAttributeListCtrl::GetTags(CStringArray& aMatched, CStringArray& aMi
 
 int CTDLTaskAttributeListCtrl::GetFileLinks(CStringArray& aFiles) const
 {
-	return Misc::Split(GetValueText(TDCA_FILELINK), aFiles);
+	return SplitValueArray(GetValueText(TDCA_FILELINK), aFiles);
 }
 
 CString CTDLTaskAttributeListCtrl::GetExternalID() const
@@ -2269,10 +2269,10 @@ BOOL CTDLTaskAttributeListCtrl::IsCustomTime(TDC_ATTRIBUTE nAttribID)
 
 CString CTDLTaskAttributeListCtrl::FormatMultiSelItems(const CStringArray& aMatched, const CStringArray& aMixed)
 {
-	CString sValue = Misc::FormatArray(aMatched);
+	CString sValue = FormatValueArray(aMatched);
 	
 	if (aMixed.GetSize())
-		sValue += ('|' + Misc::FormatArray(aMixed));
+		sValue += ('|' + FormatValueArray(aMixed));
 
 	return sValue;
 }
@@ -2282,8 +2282,8 @@ int CTDLTaskAttributeListCtrl::ParseMultiSelValues(const CString& sValues, CStri
 	CString sMatched(sValues), sMixed;
 
 	Misc::Split(sMatched, sMixed, '|');
-	Misc::Split(sMatched, aMatched);
-	Misc::Split(sMixed, aMixed);
+	SplitValueArray(sMatched, aMatched);
+	SplitValueArray(sMixed, aMixed);
 
 	return aMatched.GetSize();
 }
@@ -2395,7 +2395,7 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 			{
 				CStringArray aFiles;
 
-				if (Misc::Split(sValue, aFiles))
+				if (SplitValueArray(sValue, aFiles))
 					m_cbMultiFileLink.SetFileList(aFiles);
 
 				m_cbMultiFileLink.SetCurrentFolder(m_sCurrentFolder);
@@ -3287,7 +3287,7 @@ void CTDLTaskAttributeListCtrl::OnComboSelChange(UINT nCtrlID)
 			CStringArray aFiles;
 			
 			if (m_cbMultiFileLink.GetFileList(aFiles))
-				sNewValue = Misc::FormatArray(aFiles);
+				sNewValue = FormatValueArray(aFiles);
 		}
 		break;
 
@@ -3638,11 +3638,11 @@ BOOL CTDLTaskAttributeListCtrl::CFileDropTarget::OnDrop(CWnd* pWnd, COleDataObje
 	{
 		// Append unique file names to list
 		CStringArray aExisting;
-		Misc::Split(m_pAttributeList->GetItemText(nRow, VALUE_COL), aExisting);
+		SplitValueArray(m_pAttributeList->GetItemText(nRow, VALUE_COL), aExisting);
 
 		if (Misc::AddUniqueItems(aFiles, aExisting))
 		{
-			m_pAttributeList->SetValueText(nRow, Misc::FormatArray(aExisting));
+			m_pAttributeList->SetValueText(nRow, FormatValueArray(aExisting));
 		}
 	}
 
@@ -3897,7 +3897,7 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 				{
 					CStringArray aValues;
 
-					if (Misc::Split(GetItemText(nRow, nCol), aValues) > 1)
+					if (SplitValueArray(GetItemText(nRow, nCol), aValues) > 1)
 						sTooltip = Misc::FormatArray(aValues, NEWLINE);
 				}
 				break;
@@ -3961,7 +3961,7 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 							{
 								CStringArray aValues;
 
-								if (Misc::Split(GetItemText(nRow, nCol), aValues) > 1)
+								if (SplitValueArray(GetItemText(nRow, nCol), aValues) > 1)
 									sTooltip = Misc::FormatArray(aValues, NEWLINE);
 							}
 							break;
@@ -4108,6 +4108,16 @@ void CTDLTaskAttributeListCtrl::OnContextMenu(CWnd* pWnd, CPoint pos)
 			break;
 		}
 	}
+}
+
+CString CTDLTaskAttributeListCtrl::FormatValueArray(const CStringArray& aValues)
+{
+	return Misc::FormatArray(aValues, NEWLINE);
+}
+
+int CTDLTaskAttributeListCtrl::SplitValueArray(const CString& sValues, CStringArray& aValues)
+{
+	return Misc::Split(sValues, aValues, NEWLINE);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
