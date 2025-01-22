@@ -625,7 +625,7 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::DecodeListData(const CString& sListData)
 	return FALSE;
 }
 
-BOOL TDCCUSTOMATTRIBUTEDEFINITION::GetUserIconName(const CString& sImage, CString& sName) const
+BOOL TDCCUSTOMATTRIBUTEDEFINITION::GetListIconName(const CString& sImage, CString& sName) const
 {
 	if (IsDataType(TDCCA_ICON) && IsList())
 	{

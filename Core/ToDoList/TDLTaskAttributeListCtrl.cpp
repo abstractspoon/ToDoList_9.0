@@ -1804,7 +1804,6 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 	case TDCA_ICON:
 		if (DrawIcon(pDC, sText, rText, FALSE))
 		{
-			CString sIconName(CTDLTaskIconDlg::GetUserIconName(sText));
 
 			if (!sIconName.IsEmpty())
 			{
@@ -1961,7 +1960,7 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 
 						if (nNumIcons == 1)
 						{
-							if (!pDef->GetUserIconName(sText, sIconName))
+							if (!pDef->GetListIconName(sText, sIconName))
 								sIconName = CTDLTaskIconDlg::GetUserIconName(sText);
 						}
 					}
@@ -1972,7 +1971,7 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 						if (TDCCUSTOMATTRIBUTEDEFINITION::DecodeImageTag(sText, sImage, sIconName) &&
 							DrawIcon(pDC, sImage, rIcon, FALSE))
 						{
-							if (sIconName.IsEmpty() && (!pDef->IsList() || !pDef->GetUserIconName(sText, sIconName)))
+							if (sIconName.IsEmpty() && (!pDef->IsList() || !pDef->GetListIconName(sText, sIconName)))
 								sIconName = CTDLTaskIconDlg::GetUserIconName(sText);
 
 							rIcon.left += (ICON_SIZE + 2);
