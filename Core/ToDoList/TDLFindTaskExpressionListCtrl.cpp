@@ -1566,16 +1566,19 @@ void CTDLFindTaskExpressionListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol,
 	{
 		const SEARCHPARAM& rule = m_aSearchParams[nRow];
 
-		if (rule.TypeIs(FT_ICON))
+		switch (rule.GetAttribType())
 		{
+		case FT_ICON:
 			if (!sText.IsEmpty())
 			{
-				// Don't use sText because it might have been truncated
-				CStringArray aIcons;
-				int nNumIcons = Misc::Split(GetItemText(nRow, nCol), aIcons);
-
 				CRect rIcon(rText);
 				rIcon.DeflateRect(0, ((rText.Height() - IMAGE_SIZE) / 2));
+
+				// Don't use sText because it might have been truncated
+				CString sIcons = GetItemText(nRow, nCol);
+				CStringArray aIcons;
+
+				int nNumIcons = Misc::Split(sIcons, aIcons);
 
 				for (int nIcon = 0; nIcon < nNumIcons; nIcon++)
 				{
@@ -1587,12 +1590,33 @@ void CTDLFindTaskExpressionListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol,
 						rIcon.left += (IMAGE_SIZE + 2);
 					}
 				}
-			}
 
+				if (nNumIcons == 1) // Draw icon name?
+				{
+					CString sIconName;
+
+					if (rule.IsCustomAttribute())
+					{
+						// When switching tasklists it's possible that
+						// the new tasklist does not support the same custom
+						// attributes as the one for which the rules were
+						// configured so we DON'T want this to assert
+						int nCust = m_aCustAttribDefs.Find(rule.GetCustomAttributeID());
+
+						if ((nCust != -1) && m_aCustAttribDefs[nCust].IsList())
+							m_aCustAttribDefs[nCust].GetListIconName(sIcons, sIconName);
+					}
+
+					if (sIconName.IsEmpty())
+						sIconName = CTDLTaskIconDlg::GetUserIconName(sText);
+
+					CInputListCtrl::DrawCellText(pDC, nRow, nCol, rIcon, sIconName, crText, nDrawTextFlags);
+				}
+			}
 			return;
-		}
-		else if (rule.GetAttribute() == TDCA_COLOR)
-		{
+
+
+		case FT_COLOR:
 			if (!sText.IsEmpty())
 			{
 				COLORREF color = _ttoi(GetItemText(nRow, nCol));
@@ -1602,7 +1626,6 @@ void CTDLFindTaskExpressionListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol,
 
 				pDC->FillSolidRect(rColor, color);
 			}
-
 			return;
 		}
 	}
