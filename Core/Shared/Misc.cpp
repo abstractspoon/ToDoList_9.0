@@ -1855,24 +1855,13 @@ double Misc::Atof(const CString& sValue)
 	if (sValue.IsEmpty())
 		return 0.0;
 
-	// needs special care to handle decimal point properly
-	// especially since we've no way of knowing how it is encoded.
-	// so we assume that if a period is present then it's encoded
-	// in 'english' else it's in native format
-	char* szLocale = _strdup(setlocale(LC_NUMERIC, NULL));
-	
-	if (sValue.Find('.') != -1)
-		setlocale(LC_NUMERIC, "English");
-	else
-		setlocale(LC_NUMERIC, "");
+	// It seems as though periods can be handled by any locale
+	// but anything else requires that specific locale so we
+	// always just convert to periods
+	CString sTemp(sValue);
+	sTemp.Replace(',', '.');
 
-	double dVal = _tcstod(sValue, NULL);
-
-	// restore locale
-	setlocale(LC_NUMERIC, szLocale);
-	free(szLocale);
-	
-	return dVal; 
+	return _tcstod(sTemp, NULL);
 }
 
 BOOL Misc::ShutdownBlockReasonCreate(HWND hWnd, LPCTSTR szReason)
