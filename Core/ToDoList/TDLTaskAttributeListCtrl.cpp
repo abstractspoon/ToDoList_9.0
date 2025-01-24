@@ -108,7 +108,9 @@ const int MIN_COL_WIDTH		= (4 * EE_BTNWIDTH_DEFAULT);
 const int VALUE_VARIES = 1;
 const int TIMEPERIOD_DECPLACES = 6; // Preserve full(ish) precision
 
-const TCHAR NEWLINE = '\n';
+// We use non-printable characters to avoid clashing with user data
+const TCHAR ITEM_DELIM[2]  = { 14, 0 };
+const TCHAR MIXED_DELIM[2] = { 15, 0 };
 
 const LPCTSTR DATETIME_VARIES = _T("-1");
 
@@ -1685,7 +1687,7 @@ BOOL CTDLTaskAttributeListCtrl::GetCellPrompt(int nRow, const CString& sText, CS
 		case TDCA_FILELINK:
 		case TDCA_ALLOCTO:
 		case TDCA_DEPENDENCY:
-			bValueVaries = (sText.Find('|') != -1);
+			bValueVaries = (sText.Find(MIXED_DELIM) != -1);
 			break;
 
 		default:
@@ -1695,7 +1697,7 @@ BOOL CTDLTaskAttributeListCtrl::GetCellPrompt(int nRow, const CString& sText, CS
 				GET_CUSTDEF_RET(m_aCustomAttribDefs, nAttribID, pDef, FALSE);
 
 				if (pDef->IsList())
-					bValueVaries = (sText.Find('|') != -1);
+					bValueVaries = (sText.Find(MIXED_DELIM) != -1);
 			}
 			else if (IsCustomTime(nAttribID))
 			{
@@ -1849,11 +1851,13 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 	case TDCA_CATEGORY:
 	case TDCA_TAGS:
 		{
-			int nMixed = sText.Find('|');
+			CString sChecked = Misc::SplitLeft(sText, MIXED_DELIM);
 
-			if (nMixed != -1)
+			if (!sChecked.IsEmpty())
 			{
-				CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sText.Left(nMixed), crText, nDrawTextFlags);
+				sChecked.Replace(ITEM_DELIM, Misc::GetListSeparator());
+				CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sChecked, crText, nDrawTextFlags);
+
 				return;
 			}
 		}
@@ -1936,7 +1940,7 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 					if (pDef->IsMultiList())
 					{
 						CString sMatched(sText), sUnused;
-						Misc::Split(sMatched, sUnused, '|');
+						Misc::Split(sMatched, sUnused, MIXED_DELIM);
 
 						CStringArray aIcons;
 						int nNumIcons = SplitValueArray(sMatched, aIcons);
@@ -1975,7 +1979,7 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 				if (pDef->IsMultiList())
 				{
 					CString sMatched(sText), sUnused;
-					Misc::Split(sMatched, sUnused, '|');
+					Misc::Split(sMatched, sUnused, MIXED_DELIM);
 
 					CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sMatched, crText, nDrawTextFlags);
 					return;
@@ -2272,7 +2276,7 @@ CString CTDLTaskAttributeListCtrl::FormatMultiSelItems(const CStringArray& aMatc
 	CString sValue = FormatValueArray(aMatched);
 	
 	if (aMixed.GetSize())
-		sValue += ('|' + FormatValueArray(aMixed));
+		sValue += (MIXED_DELIM + FormatValueArray(aMixed));
 
 	return sValue;
 }
@@ -2281,7 +2285,7 @@ int CTDLTaskAttributeListCtrl::ParseMultiSelValues(const CString& sValues, CStri
 {
 	CString sMatched(sValues), sMixed;
 
-	Misc::Split(sMatched, sMixed, '|');
+	Misc::Split(sMatched, sMixed, MIXED_DELIM);
 	SplitValueArray(sMatched, aMatched);
 	SplitValueArray(sMixed, aMixed);
 
@@ -3898,7 +3902,7 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 					CStringArray aValues;
 
 					if (SplitValueArray(GetItemText(nRow, nCol), aValues) > 1)
-						sTooltip = Misc::FormatArray(aValues, NEWLINE);
+						sTooltip = Misc::FormatArray(aValues, ITEM_DELIM);
 				}
 				break;
 
@@ -3943,7 +3947,7 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 					CTDCDependencyArray aDepends;
 					
 					if (aDepends.Parse(GetItemText(nRow, nCol)) > 1)
-						sTooltip = m_formatter.GetDependencies(aDepends, NEWLINE);
+						sTooltip = m_formatter.GetDependencies(aDepends, '\n');
 				}
 				break;
 
@@ -3962,7 +3966,7 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 								CStringArray aValues;
 
 								if (SplitValueArray(GetItemText(nRow, nCol), aValues) > 1)
-									sTooltip = Misc::FormatArray(aValues, NEWLINE);
+									sTooltip = Misc::FormatArray(aValues, ITEM_DELIM);
 							}
 							break;
 						}
@@ -4112,12 +4116,12 @@ void CTDLTaskAttributeListCtrl::OnContextMenu(CWnd* pWnd, CPoint pos)
 
 CString CTDLTaskAttributeListCtrl::FormatValueArray(const CStringArray& aValues)
 {
-	return Misc::FormatArray(aValues, NEWLINE);
+	return Misc::FormatArray(aValues, ITEM_DELIM);
 }
 
 int CTDLTaskAttributeListCtrl::SplitValueArray(const CString& sValues, CStringArray& aValues)
 {
-	return Misc::Split(sValues, aValues, NEWLINE);
+	return Misc::Split(sValues, aValues, ITEM_DELIM);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
