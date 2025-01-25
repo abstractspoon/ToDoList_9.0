@@ -349,6 +349,8 @@ void CMiscTest::TestHasSuffix()
 
 void  CMiscTest::TestAtof()
 {
+	CTDCScopedTest test(*this, _T("Misc::Atof"));
+	
 	TestAtof("C");
 	TestAtof("en-GB");
 	TestAtof("en-BE");
