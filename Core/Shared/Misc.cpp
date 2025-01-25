@@ -1895,16 +1895,39 @@ const CString& Misc::GetLongest(const CString& str1, const CString& str2, BOOL b
 
 double Misc::Atof(const CString& sValue)
 {
-	if (sValue.IsEmpty())
-		return 0.0;
+	double dValue = 0.0;
 
-	// It seems as though periods can be handled by any locale
-	// but anything else requires that specific locale so we
-	// always just convert to periods
-	CString sTemp(sValue);
-	sTemp.Replace(',', '.');
+	if (!sValue.IsEmpty())
+	{
+		// Always use the 'C' locale and convert decimal separators 
+		// to periods because that gives us much more control
+		CTempLocale loc(LC_NUMERIC, "C");
+		
+		if (sValue.Find('.') != -1)
+		{
+			// No changes required
+			dValue = _tcstod(sValue, NULL);
+		}
+		else
+		{
+			CString sTemp(sValue);
+			
+			// Check for comma as most likely next bet
+			if (sTemp.Replace(',', '.') == 0)
+			{
+				// else check for a custom decimal
+				// separator unless that's a comma too
+				TCHAR cDecSep = GetDecimalSeparator()[0];
+				
+				if (cDecSep != ',')
+					sTemp.Replace(cDecSep, '.');
+			}
+			
+			dValue = _tcstod(sTemp, NULL);
+		}
+	}
 
-	return _tcstod(sTemp, NULL);
+	return dValue;
 }
 
 BOOL Misc::ShutdownBlockReasonCreate(HWND hWnd, LPCTSTR szReason)
@@ -2210,8 +2233,8 @@ int Misc::ParseSearchString(LPCTSTR szSearch, CStringArray& aWords)
 
 CString Misc::Format(double dVal, int nDecPlaces, LPCTSTR szTrail)
 {
-	char* szLocale = _strdup(setlocale(LC_NUMERIC, NULL)); // current locale
-	setlocale(LC_NUMERIC, ""); // local default
+	// Change locale to local default
+	CTempLocale(LC_NUMERIC, "");
 
 	CString sValue;
 
@@ -2230,10 +2253,6 @@ CString Misc::Format(double dVal, int nDecPlaces, LPCTSTR szTrail)
 		sValue.Format(_T("%.*f"), nDecPlaces, dVal); 
 		break;
 	}
-				
-	// restore locale
-	setlocale(LC_NUMERIC, szLocale);
-	free(szLocale);
 
 	return (sValue + szTrail);
 }
@@ -2267,12 +2286,10 @@ CString Misc::Format(LPCTSTR lpszFormat, ...)
 
 #define FORMAT_REGION_VALUE(FUNC)                             \
                                                               \
-char* szPrevLocale = _strdup(setlocale(LC_NUMERIC, NULL));    \
-setlocale(LC_NUMERIC, "");                                    \
+{ CTempLocale loc(LC_NUMERIC, "");                            \
 const UINT BUFSIZE = 100; TCHAR szValue[BUFSIZE + 1] = { 0 }; \
 FUNC(NULL, 0, sValue, NULL, szValue, BUFSIZE);                \
-sValue = szValue;                                             \
-setlocale(LC_NUMERIC, szPrevLocale); free(szPrevLocale);
+sValue = szValue; }
 
 // ----------------------------------------------------------------
 
