@@ -39,6 +39,49 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
+CTempLocale::CTempLocale(const CString& sLocale) : m_nCategory(-1)
+{
+	Initialise(LC_ALL, sLocale);
+}
+
+CTempLocale::CTempLocale(int nCategory, const CString& sLocale) : m_nCategory(-1)
+{
+	Initialise(nCategory, sLocale);
+}
+
+CTempLocale::~CTempLocale()
+{
+	_tsetlocale(m_nCategory, m_sLocale);
+}
+
+void CTempLocale::Initialise(int nCategory, const CString& sLocale)
+{
+	ASSERT(m_nCategory == -1);
+	ASSERT(m_sLocale.IsEmpty());
+
+	m_nCategory = nCategory;
+	m_sLocale = sLocale;
+
+#ifdef _DEBUG
+	CString sNewLocale = _tsetlocale(m_nCategory, sLocale);
+	ASSERT(m_sLocale.IsEmpty() || (sNewLocale == m_sLocale));
+#else
+	_tsetlocale(m_nCategory, sLocale);
+#endif
+}
+
+void CTempLocale::ChangeLocale(const CString& sAltLocale)
+{
+	_tsetlocale(m_nCategory, sAltLocale);
+}
+
+CString CTempLocale::Current(int nCategory)
+{
+	return _tsetlocale(nCategory, NULL);
+}
+
+//////////////////////////////////////////////////////////////////////
+
 BOOL Misc::Is64BitWindows()
 {
 #if defined(_WIN64)
