@@ -366,7 +366,12 @@ void CMiscTest::TestAtof(const CString& sLocale)
 	ExpectEQ(CTempLocale::Current(), _T("C"));
 	{
 		CTempLocale loc(LC_ALL, sLocale);
+
+#if _MSC_VER <= 1200 // VC6
+		ExpectEQ(CTempLocale::Current(), _T("C"));
+#else
 		ExpectEQ(CTempLocale::Current(), sLocale);
+#endif
 
 		ExpectEQ(Misc::Atof(_T("10.12345")), 10.12345);
 		ExpectEQ(Misc::Atof(_T("-10.12345")), -10.12345);
