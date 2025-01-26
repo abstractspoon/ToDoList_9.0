@@ -51,20 +51,20 @@ CTempLocale::CTempLocale(int nCategory, const CString& sLocale) : m_nCategory(-1
 
 CTempLocale::~CTempLocale()
 {
-	_tsetlocale(m_nCategory, m_sLocale);
+	_tsetlocale(m_nCategory, m_sPrevLocale);
 }
 
 void CTempLocale::Initialise(int nCategory, const CString& sLocale)
 {
 	ASSERT(m_nCategory == -1);
-	ASSERT(m_sLocale.IsEmpty());
+	ASSERT(m_sPrevLocale.IsEmpty());
 
 	m_nCategory = nCategory;
-	m_sLocale = sLocale;
+	m_sPrevLocale = _tsetlocale(m_nCategory, NULL);
 
 #ifdef _DEBUG
 	CString sNewLocale = _tsetlocale(m_nCategory, sLocale);
-	ASSERT(m_sLocale.IsEmpty() || (sNewLocale == m_sLocale));
+	ASSERT(sLocale.IsEmpty() || (sNewLocale == sLocale));
 #else
 	_tsetlocale(m_nCategory, sLocale);
 #endif

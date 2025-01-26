@@ -59,7 +59,7 @@ public:
 
 protected:
 	int m_nCategory;
-	CString m_sLocale;
+	CString m_sPrevLocale;
 
 protected:
 	void Initialise(int nCategory, const CString& sLocale);
