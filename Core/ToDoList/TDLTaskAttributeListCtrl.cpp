@@ -553,12 +553,10 @@ int CTDLTaskAttributeListCtrl::GetGroupAttributes(TDC_ATTRIBUTEGROUP nGroup, CMa
 			if (attribDef.bEnabled)
 			{
 				TDC_ATTRIBUTE nAttribID = attribDef.GetAttributeID();
-				CEnString sAttrib(IDS_CUSTOMCOLUMN, attribDef.sLabel);
-
-				mapAttrib[nAttribID] = sAttrib;
+				mapAttrib[nAttribID] = attribDef.sLabel;
 
 				if (attribDef.IsDataType(TDCCA_DATE) && attribDef.HasFeature(TDCCAF_SHOWTIME))
-					mapAttrib[CUSTOMTIMEATTRIBID(nAttribID)] = sAttrib;
+					mapAttrib[CUSTOMTIMEATTRIBID(nAttribID)] = attribDef.sLabel;
 			}
 		}
 	}
