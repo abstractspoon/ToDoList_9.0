@@ -197,12 +197,14 @@ protected:
 	afx_msg void OnDateKillFocus(NMHDR* pNMHDR, LRESULT* pResult);
 
 	afx_msg void OnDependsChange();
-	afx_msg void OnTimePeriodChange();
-	afx_msg void OnSingleFileLinkChange();
+	afx_msg void OnDependsKillFocus();
+	afx_msg void OnTimePeriodKillFocus();
+	afx_msg void OnSingleFileLinkKillFocus();
+	afx_msg void OnTimeOfDaySelEndOK();
 
 	afx_msg void OnComboKillFocus(UINT nCtrlID);
 	afx_msg void OnComboCloseUp(UINT nCtrlID);
-	afx_msg void OnComboEditChange(UINT nCtrlID);
+	afx_msg void OnComboSelChange(UINT nCtrlID);
 
 	afx_msg LRESULT OnAutoComboAddDelete(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnEnEditButtonClick(WPARAM wParam, LPARAM lParam);
@@ -248,7 +250,7 @@ protected:
 	CWnd* GetEditControl(int nRow, BOOL bBtnClick);
 	void RefreshSelectedTasksValue(int nRow);
 	void NotifyParentEdit(int nRow, LPARAM bUnitsChange = FALSE);
-	BOOL DrawIcon(CDC* pDC, const CString& sIcon, const CRect& rText, BOOL bIconIsFile);
+	BOOL DrawIcon(CDC* pDC, const CString& sIcon, CRect& rIcon, BOOL bIconIsFile);
  	BOOL GetCellPrompt(int nRow, const CString& sText, CString& sPrompt) const;
 	void HandleTimePeriodEdit(int nRow, BOOL bBtnClick);
 	CString FormatDate(const COleDateTime& date, BOOL bAndTime) const;
@@ -280,6 +282,8 @@ protected:
 	static BOOL IsCustomTime(TDC_ATTRIBUTE nAttribID);
 	static int HitTestExtraButton(int nRow, const CRect& rBtn, const CPoint& ptMouse, int nNumExtraBtns);
 	static BOOL GetExtraButtonRect(const CRect& rBtn, int nExtraBtn, CRect& rExtraBtn);
+	static CString FormatValueArray(const CStringArray& aValues);
+	static int SplitValueArray(const CString& sValues, CStringArray& aValues);
 
 private:
 	// ---------------------------------------------------------------------

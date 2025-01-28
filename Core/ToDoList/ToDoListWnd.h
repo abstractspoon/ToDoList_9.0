@@ -714,9 +714,9 @@ protected:
 	void StartTimeTrackingTask(int nTDC, DWORD dwTaskID, TIMETRACKSRC nFrom);
 	void StopTimeTrackingTask(int nTDC, TIMETRACKSRC nFrom);
 
-	void UpdateFilterBarListData(TDC_ATTRIBUTE nAttribID);
-	void RefreshFilterBarControls(TDC_ATTRIBUTE nAttribID, BOOL bClearCheckboxHistory = FALSE);
-	void RefreshFindTasksListData(TDC_ATTRIBUTE nAttribID);
+	void UpdateFilterBarListData(TDC_ATTRIBUTE nAttribID = TDCA_ALL);
+	void UpdateFindTasksListData(TDC_ATTRIBUTE nAttribID = TDCA_ALL);
+	void RefreshFilterBarControls(TDC_ATTRIBUTE nAttribID = TDCA_ALL, BOOL bClearCheckboxHistory = FALSE);
 	void RefreshFilterBarAdvancedFilters();
 	void RemapAdvancedFilterMenuItemIDs(const CStringArray& aOldFilters, const CStringArray& aNewFilters);
 
