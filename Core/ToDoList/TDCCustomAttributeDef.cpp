@@ -1282,7 +1282,7 @@ BOOL CTDCCustomAttribDefinitionArray::CalculationHasFeature(const TDCCUSTOMATTRI
 	if (!Misc::HasFlag(attribDef.dwFeatures, dwFeature))
 		return FALSE;
 
-	DWORD dwResultType = GetCalculationResultDataType(attribDef.Calculation());
+	DWORD dwResultType = GetCalculationResultDataType(attribDef.calculation);
 
 	return TDCCUSTOMATTRIBUTEDEFINITION::AttributeSupportsFeature(dwResultType, attribDef.GetListType(), dwFeature);
 }
@@ -1381,7 +1381,7 @@ const TDCCUSTOMATTRIBUTEDEFINITION& CTDCCustomAttribDefinitionArray::GetDefiniti
 DWORD CTDCCustomAttribDefinitionArray::GetAttributeDataType(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bResolveCalcType) const
 {
 	if (bResolveCalcType && attribDef.IsDataType(TDCCA_CALCULATION))
-		return GetCalculationResultDataType(attribDef.Calculation());
+		return GetCalculationResultDataType(attribDef.calculation);
 
 	return attribDef.GetDataType();
 }
@@ -1471,7 +1471,7 @@ DWORD CTDCCustomAttribDefinitionArray::GetCalculationOperandDataType(const TDCCU
 			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = ElementAt(nAtt);
 
 			if (attribDef.IsDataType(TDCCA_CALCULATION))
-				return GetCalculationResultDataType(attribDef.Calculation()); // RECURSIVE CALL
+				return GetCalculationResultDataType(attribDef.calculation); // RECURSIVE CALL
 
 			if (!attribDef.IsMultiList())
 				return attribDef.GetDataType();
