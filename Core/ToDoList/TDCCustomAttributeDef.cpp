@@ -1297,12 +1297,22 @@ BOOL CTDCCustomAttribDefinitionArray::AnyCalculationUsesAnyAttribute(const CTDCA
 
 		if (!def.IsCalculation())
 			continue;
+
+		// First operand
+		TDC_ATTRIBUTE nFirstOpAttribID = (def.calculation.opFirst.IsCustom() ? 
+										  GetAttributeID(def.calculation.opFirst.sCustAttribID) :
+										  def.calculation.opFirst.nAttributeID);
 		
-		if (mapAttribIDs.Has(def.Calculation().opFirst.nAttributeID) ||
-			mapAttribIDs.Has(def.Calculation().opSecond.nAttributeID))
-		{
+		if (mapAttribIDs.Has(nFirstOpAttribID))
 			return TRUE;
-		}
+
+		// Second operand
+		TDC_ATTRIBUTE nSecondOpAttribID = (def.calculation.opSecond.IsCustom() ? 
+										  GetAttributeID(def.calculation.opSecond.sCustAttribID) :
+										  def.calculation.opSecond.nAttributeID);
+		
+		if (mapAttribIDs.Has(nSecondOpAttribID))
+			return TRUE;
 	}
 
 	return FALSE;
