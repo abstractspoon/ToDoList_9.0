@@ -30,7 +30,6 @@ CTDLFindTaskAttributeComboBox::~CTDLFindTaskAttributeComboBox()
 {
 }
 
-
 BEGIN_MESSAGE_MAP(CTDLFindTaskAttributeComboBox, CTDLAttributeComboBox)
 	//{{AFX_MSG_MAP(CTDLFindTaskAttributeComboBox)
 		// NOTE - the ClassWizard will add and remove mapping macros here.
