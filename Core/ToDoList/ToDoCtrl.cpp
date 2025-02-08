@@ -9928,11 +9928,11 @@ BOOL CToDoCtrl::CanClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttribID) const
 
 	switch (nAttribID)
 	{
-	case TDCA_LOCK:
-		return TRUE;
+	case TDCA_LOCK:		return TRUE;
+	case TDCA_TASKNAME:	return FALSE;
 
-	case TDCA_TASKNAME:
 	case TDCA_PROJECTNAME:
+		ASSERT(0);
 		return FALSE;
 	}
 
@@ -10180,11 +10180,11 @@ BOOL CToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 
 	case TDCA_NEWTASK:
 	case TDCA_PASTE:
-	case TDCA_PROJECTNAME:
 	case TDCA_UNDO:
 	case TDCA_CUSTOMATTRIBDEFS:
 	case TDCA_POSITION:
 	case TDCA_ENCRYPT:
+	case TDCA_PROJECTNAME:
 		return TRUE;
 
 	case TDCA_LOCK:

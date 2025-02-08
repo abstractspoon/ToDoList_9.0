@@ -1117,7 +1117,6 @@ FIND_ATTRIBTYPE SEARCHPARAM::GetAttribType(TDC_ATTRIBUTE nAttribID, BOOL bRelati
 	case TDCA_VERSION:
 	case TDCA_COMMENTS:
 	case TDCA_FILELINK:
-	case TDCA_PROJECTNAME:
 	case TDCA_CREATEDBY:
 	case TDCA_EXTERNALID:
 	case TDCA_TAGS:
@@ -2616,7 +2615,6 @@ BOOL TDCCOLEDITVISIBILITY::IsSupportedEdit(TDC_ATTRIBUTE nAttribID)
 	case TDCA_STARTTIME:
 	case TDCA_DONETIME:
 	case TDCA_TAGS:
-	case TDCA_PROJECTNAME:
 	case TDCA_FLAG:
 	case TDCA_LOCK:
 	case TDCA_ICON:
@@ -3082,3 +3080,4 @@ void CTDCAttributeMapping::Trace() const
 #endif
 }
 
+/////////////////////////////////////////////////////////////////////////////
