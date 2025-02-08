@@ -40,6 +40,15 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CTDLFindTaskAttributeComboBox message handlers
 
+BOOL CTDLFindTaskAttributeComboBox::WantAttribute(TDC_ATTRIBUTE nAttribID) const
+{
+	if (nAttribID == TDCA_TODAY) 
+		return FALSE;
+	
+	// All else
+	return CTDLAttributeComboBox::WantAttribute(nAttribID);
+}
+
 BOOL CTDLFindTaskAttributeComboBox::SelectAttribute(const SEARCHPARAM& rule)
 {
 	DWORD dwItemData = EncodeItemData(rule.GetAttribute(), rule.GetFlags());

@@ -41,6 +41,7 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 
+	virtual BOOL WantAttribute(TDC_ATTRIBUTE nAttribID) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////
