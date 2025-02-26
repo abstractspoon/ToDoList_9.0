@@ -8,8 +8,6 @@
 
 #include "..\shared\Misc.h"
 
-#include "..\3rdParty\JalaliCalendar.h"
-
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;

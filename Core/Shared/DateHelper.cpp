@@ -812,7 +812,8 @@ BOOL CDateHelper::DecodeDate(const CString& sDate, COleDateTime& date, BOOL bAnd
 	}
 
 	// Handle Persian/Jalali dates
-	if ((date.m_dt < 0.0) && (::GetThreadLocale() == LCID_PERSIAN))
+	if ((date.m_dt < 0.0) && 
+		(Misc::GetPrimaryLanguage() == LANG_PERSIAN))
 	{
 		CJalaliCalendar::JalaliToGregorian(COleDateTime(date), date);
 	}
@@ -1573,6 +1574,15 @@ BOOL CDateHelper::FormatDate(const COleDateTime& date, DWORD dwFlags, CString& s
 			CString sSep = Misc::GetDateSeparator();
 			Misc::Trim(sFormat, sSep);
 			sFormat.Replace((sSep + sSep), sSep);
+		}
+
+		// RTL dates
+		switch (Misc::GetPrimaryLanguage())
+		{
+		case LANG_ARABIC:
+		case LANG_PERSIAN:
+			Misc::Reverse(sFormat);
+			break;
 		}
 	}
 

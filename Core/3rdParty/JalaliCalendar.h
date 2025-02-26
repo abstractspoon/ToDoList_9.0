@@ -4,11 +4,7 @@
 
 #ifndef LANG_PERSIAN
 #	define LANG_PERSIAN 0x29
-#	define SUBLANG_PERSIAN_IRAN 0x01 
 #endif
-
-const LANGID LANGID_PERSIAN = MAKELANGID(LANG_PERSIAN, SUBLANG_PERSIAN_IRAN);
-const LCID   LCID_PERSIAN = MAKELCID(LANGID_PERSIAN, SORT_DEFAULT);
 
 //////////////////////////////////////////////////////////////////////
 
