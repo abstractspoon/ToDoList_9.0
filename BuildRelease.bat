@@ -1,3 +1,5 @@
+title ToDoList_9.0 Release Build
+
 ECHO OFF
 CLS
 
@@ -32,8 +34,12 @@ if %errorlevel%==1 (
 REM - Check for link errors
 findstr /C:"Error executing link.exe" %OUTPUT_FILE%
 )
+
+if %errorlevel%==1 (
+echo [42m Build SUCCEEDED[0m
+)
 if %errorlevel%==0 (
-echo Build Errors!
+echo [41m Build FAILED[0m
 pause
 exit
 )
@@ -43,12 +49,29 @@ ECHO ON
 
 cd TDLTest\Unicode_Release
 
+set OUTPUT_FILE=%REPO%\Core\TDLTest\Unicode_Release\Test_Output.txt
+del %OUTPUT_FILE%
+
 TDLTest > %OUTPUT_FILE%
 
+REM - Check for test errors
 ECHO OFF
 findstr /C:"tests FAILED" %OUTPUT_FILE%
+
 if %errorlevel%==0 (
-echo Test Errors!
+echo [41m Tests FAILED[0m
+pause
+exit
+)
+
+REM - Check for test success
+findstr /C:"tests SUCCEEDED" %OUTPUT_FILE% > nul
+
+if %errorlevel%==0 (
+echo [42m Tests SUCCEEDED[0m
+)
+if %errorlevel%==1 (
+echo [41m Test Results EMPTY[0m
 pause
 exit
 )
@@ -56,14 +79,28 @@ exit
 REM - Build plugins using MSBuild for reliability
 ECHO ON
 
-SET MSBUILD="C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\MSBuild\15.0\Bin\MSBuild.exe"
-SET BUILDPARAMS=/t:Build /p:Configuration=Release /m /v:normal /noWarn:MSB3267;MSB3305;LNK4248;CS1762;LNK4221;MSB3026
-
-REM - This is required to get the warning suppression to work
-SET VCTargetsPath=C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\
-
+SET MSBUILD="C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe"
 cd %REPO%\Plugins
-%MSBUILD% .\ToDoList_Plugins.sln %BUILDPARAMS%
+
+set OUTPUT_FILE=%REPO%\Plugins\Release\Build_Output.txt
+del %OUTPUT_FILE%
+
+%MSBUILD% .\ToDoList_Plugins.sln /t:Build /p:Configuration=Release /m /v:normal > %OUTPUT_FILE%
+
+REM - Check for build errors
+ECHO OFF
+findstr /C:"Build FAILED." %OUTPUT_FILE%
+
+if %errorlevel%==1 (
+echo [42m Build SUCCEEDED[0m
+)
+if %errorlevel%==0 (
+echo [41m Build FAILED[0m
+pause
+exit
+)
+
+ECHO ON
 
 REM - Allow caller to cancel building Zip
 pause
