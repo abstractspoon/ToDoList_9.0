@@ -67,6 +67,7 @@ void TDCDATETIMEWIDTHS::Initialise(CDC* pDC)
 	}
 
 	// Sanity check
+	ASSERT(nMaxDateWidth == -1);
 	ASSERT(nMinDateWidth == -1);
 	ASSERT(nMaxTimeWidth == -1);
 	ASSERT(nMaxDowNameWidth == -1);
