@@ -231,6 +231,7 @@ BEGIN_MESSAGE_MAP(CTDLTaskCtrlBase, CWnd)
 	ON_WM_TIMER()
 	ON_WM_HELPINFO()
 	ON_WM_CONTEXTMENU()
+	ON_MESSAGE(WM_SETFONT, OnSetFont)
 
 END_MESSAGE_MAP()
 
@@ -321,6 +322,13 @@ int CTDLTaskCtrlBase::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	}
 
 	return 0;
+}
+
+LRESULT CTDLTaskCtrlBase::OnSetFont(WPARAM wp, LPARAM lp)
+{
+	m_dateTimeWidths.ResetWidths();
+
+	return CWnd::Default();
 }
 
 int CTDLTaskCtrlBase::OnToolHitTest(CPoint point, TOOLINFO * pTI) const
@@ -1746,8 +1754,8 @@ BOOL CTDLTaskCtrlBase::SetFont(HFONT hFont)
 		CHoldRedraw hr(*this);
 		::SendMessage(Tasks(), WM_SETFONT, (WPARAM)hFont, TRUE);
 
-		RecalcUntrackedColumnWidths();
 		m_dateTimeWidths.ResetWidths();
+		RecalcUntrackedColumnWidths();
 	}
 	
 	return bChange;
@@ -5207,7 +5215,7 @@ void CTDLTaskCtrlBase::RedrawTasks(BOOL bErase) const
 
 int CTDLTaskCtrlBase::CalcMaxDateColWidth(TDC_DATE nDate, CDC* pDC, BOOL bCustomWantsTime) const
 {
-	return m_dateTimeWidths.CalcMaxColumWidth(WantDrawColumnTime(nDate, bCustomWantsTime), 
+	return m_dateTimeWidths.CalcMaxColumWidth(WantDrawColumnTime(nDate, bCustomWantsTime),
 											  HasStyle(TDCS_SHOWWEEKDAYINDATES));
 }
 
