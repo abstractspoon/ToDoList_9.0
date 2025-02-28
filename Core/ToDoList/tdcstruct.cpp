@@ -39,7 +39,7 @@ TDCDATETIMEWIDTHS::TDCDATETIMEWIDTHS()
 
 void TDCDATETIMEWIDTHS::SetIsoFormat(BOOL bIso)
 {
-	if ((bIso && bIsoFormat) || (!bIso && !bIsoFormat))
+	if (!Misc::StateChanged(bIso, bIsoFormat))
 		return;
 
 	bIsoFormat = bIso;
@@ -49,7 +49,7 @@ void TDCDATETIMEWIDTHS::SetIsoFormat(BOOL bIso)
 
 void TDCDATETIMEWIDTHS::ResetWidths()
 {
-	nMaxDateWidth = nMinDateWidth = nMaxTimeWidth = nMaxDowNameWidth = -1;
+	nMaxDateWidth = nMinDateWidth = nMaxTimeWidth = nMaxDowNameWidth = nSepWidth = -1;
 }
 
 void TDCDATETIMEWIDTHS::Initialise(CDC* pDC)
@@ -61,14 +61,17 @@ void TDCDATETIMEWIDTHS::Initialise(CDC* pDC)
 		ASSERT(nMinDateWidth > 0);
 		ASSERT(nMaxTimeWidth > 0);
 		ASSERT(nMaxDowNameWidth > 0);
+		ASSERT(nSepWidth > 0);
 
 		return;
 	}
 
 	// Sanity check
+	ASSERT(nMaxDateWidth == -1);
 	ASSERT(nMinDateWidth == -1);
 	ASSERT(nMaxTimeWidth == -1);
 	ASSERT(nMaxDowNameWidth == -1);
+	ASSERT(nSepWidth == -1);
 
 	COleDateTime dtMax(2000, 12, 31, 0, 0, 0);
 	DWORD dwDateFmt = (bIsoFormat ? DHFD_ISO : 0);
@@ -79,10 +82,45 @@ void TDCDATETIMEWIDTHS::Initialise(CDC* pDC)
 	CString sMinDate = CDateHelper::FormatDate(dtMax, (dwDateFmt | DHFD_NOYEAR));
 	nMinDateWidth = pDC->GetTextExtent(sMinDate).cx;
 
-	CString sMaxTime = CTimeHelper::FormatClockTime(23, 59, 0, FALSE, bIsoFormat);
-	nMaxTimeWidth = pDC->GetTextExtent(sMaxTime).cx;
+	if (bIsoFormat || Misc::GetAM().IsEmpty())
+	{
+		CString sMaxTime = CTimeHelper::FormatClockTime(23, 59, 0, FALSE, bIsoFormat);
+		nMaxTimeWidth = pDC->GetTextExtent(sMaxTime).cx;
+	}
+	else
+	{
+		// We can't rely on AM/PM designators being of the same length
+		CString sMaxAMTime = CTimeHelper::FormatClockTime(11, 59, 0, FALSE, FALSE);
+		CString sMaxPMTime = CTimeHelper::FormatClockTime(23, 59, 0, FALSE, FALSE);
+
+		int nMaxAMTimeWidth = pDC->GetTextExtent(sMaxAMTime).cx;
+		int nMaxPMTimeWidth = pDC->GetTextExtent(sMaxPMTime).cx;
+
+		nMaxTimeWidth = max(nMaxAMTimeWidth, nMaxPMTimeWidth);
+	}
 
 	nMaxDowNameWidth = CDateHelper::GetMaxDayOfWeekNameWidth(pDC, TRUE);
+	nSepWidth = pDC->GetTextExtent(_T(" ")).cx;
+}
+
+int TDCDATETIMEWIDTHS::CalcMaxColumWidth(BOOL bIncTime, BOOL bIncDow) const
+{
+	// Always want date
+	int nWidth = nMaxDateWidth;
+
+	if (bIncTime)
+	{
+		nWidth += nSepWidth;
+		nWidth += nMaxTimeWidth;
+	}
+
+	if (bIncDow)
+	{
+		nWidth += nSepWidth;
+		nWidth += nMaxDowNameWidth;
+	}
+
+	return nWidth;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1117,7 +1155,6 @@ FIND_ATTRIBTYPE SEARCHPARAM::GetAttribType(TDC_ATTRIBUTE nAttribID, BOOL bRelati
 	case TDCA_VERSION:
 	case TDCA_COMMENTS:
 	case TDCA_FILELINK:
-	case TDCA_PROJECTNAME:
 	case TDCA_CREATEDBY:
 	case TDCA_EXTERNALID:
 	case TDCA_TAGS:
@@ -2616,7 +2653,6 @@ BOOL TDCCOLEDITVISIBILITY::IsSupportedEdit(TDC_ATTRIBUTE nAttribID)
 	case TDCA_STARTTIME:
 	case TDCA_DONETIME:
 	case TDCA_TAGS:
-	case TDCA_PROJECTNAME:
 	case TDCA_FLAG:
 	case TDCA_LOCK:
 	case TDCA_ICON:
@@ -2725,8 +2761,8 @@ int TDCCOLEDITVISIBILITY::UpdateEditVisibility()
 
 		for (int nAttrib = 0; nAttrib < ATTRIB_COUNT; nAttrib++)
 		{
-			if (IsEditFieldVisible(ATTRIBUTES[nAttrib].nAttributeID))
-				mapVisibleEdits.Add(ATTRIBUTES[nAttrib].nAttributeID);
+			if (IsEditFieldVisible(TASKATTRIBUTES[nAttrib].nAttributeID))
+				mapVisibleEdits.Add(TASKATTRIBUTES[nAttrib].nAttributeID);
 		}
 	}
 
@@ -2739,8 +2775,8 @@ int TDCCOLEDITVISIBILITY::GetAllEditFields(CTDCAttributeMap& mapAttrib)
 
 	for (int nAttrib = 0; nAttrib < ATTRIB_COUNT; nAttrib++)
 	{
-		if (IsSupportedEdit(ATTRIBUTES[nAttrib].nAttributeID))
-			mapAttrib.Add(ATTRIBUTES[nAttrib].nAttributeID);
+		if (IsSupportedEdit(TASKATTRIBUTES[nAttrib].nAttributeID))
+			mapAttrib.Add(TASKATTRIBUTES[nAttrib].nAttributeID);
 	}
 
 	return mapAttrib.GetCount();
@@ -2961,8 +2997,8 @@ int TDCCOLEDITFILTERVISIBILITY::UpdateFilterVisibility()
 
 		for (int nAttrib = 0; nAttrib < ATTRIB_COUNT; nAttrib++)
 		{
-			if (IsFilterFieldVisible(ATTRIBUTES[nAttrib].nAttributeID))
-				mapVisibleFilters.Add(ATTRIBUTES[nAttrib].nAttributeID);
+			if (IsFilterFieldVisible(TASKATTRIBUTES[nAttrib].nAttributeID))
+				mapVisibleFilters.Add(TASKATTRIBUTES[nAttrib].nAttributeID);
 		}
 	}
 
@@ -2975,8 +3011,8 @@ int TDCCOLEDITFILTERVISIBILITY::GetAllFilterFields(CTDCAttributeMap& mapAttrib)
 
 	for (int nAttrib = 0; nAttrib < ATTRIB_COUNT; nAttrib++)
 	{
-		if (IsSupportedFilter(ATTRIBUTES[nAttrib].nAttributeID))
-			mapAttrib.Add(ATTRIBUTES[nAttrib].nAttributeID);
+		if (IsSupportedFilter(TASKATTRIBUTES[nAttrib].nAttributeID))
+			mapAttrib.Add(TASKATTRIBUTES[nAttrib].nAttributeID);
 	}
 
 	return mapAttrib.GetCount();
@@ -3082,3 +3118,4 @@ void CTDCAttributeMapping::Trace() const
 #endif
 }
 
+/////////////////////////////////////////////////////////////////////////////

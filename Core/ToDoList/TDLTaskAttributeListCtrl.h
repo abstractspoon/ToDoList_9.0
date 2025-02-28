@@ -237,6 +237,7 @@ protected:
 
 protected:
 	CString GetValueText(TDC_ATTRIBUTE nAttribID) const;
+	COleDateTime GetDateTime(TDC_ATTRIBUTE nAttribID) const;
 	TDC_ATTRIBUTE GetAttributeID(int nRow, BOOL bResolveCustomTimeFields = FALSE) const;
 	TDC_ATTRIBUTE MapTimeToDate(TDC_ATTRIBUTE nTimeAttribID) const;
 
@@ -284,6 +285,7 @@ protected:
 	static BOOL GetExtraButtonRect(const CRect& rBtn, int nExtraBtn, CRect& rExtraBtn);
 	static CString FormatValueArray(const CStringArray& aValues);
 	static int SplitValueArray(const CString& sValues, CStringArray& aValues);
+	static void RebuildCombo(CEnCheckComboBox& combo, const CStringArray& aDefValues, const CStringArray& aUserValues, BOOL bMultiSel, BOOL bWantSort);
 
 private:
 	// ---------------------------------------------------------------------

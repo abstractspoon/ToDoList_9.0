@@ -6749,8 +6749,8 @@ TDC_ATTRIBUTEGROUP CTDCTaskAttributeCopier::GetAttributeGroup(TDC_ATTRIBUTE nAtt
 	// Built-in attributes
 	for (int nAttrib = 0; nAttrib < ATTRIB_COUNT; nAttrib++)
 	{
-		if (nAttribID == ATTRIBUTES[nAttrib].nAttributeID)
-			return ATTRIBUTES[nAttrib].nGroup;
+		if (nAttribID == TASKATTRIBUTES[nAttrib].nAttributeID)
+			return TASKATTRIBUTES[nAttrib].nGroup;
 	}
 
 	// All else

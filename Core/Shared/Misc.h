@@ -116,6 +116,7 @@ namespace Misc
 	
 	int RemoveItems(const CStringArray& aItems, CStringArray& aFrom, BOOL bCaseSensitive = FALSE);
 	int RemoveEmptyItems(CStringArray& aFrom);
+	int RemoveDuplicates(CStringArray& aFrom, BOOL bCaseSensitive = FALSE);
 	BOOL RemoveItem(LPCTSTR szItem, CStringArray& aFrom, BOOL bCaseSensitive = FALSE);
 	int AddUniqueItems(const CStringArray& aItems, CStringArray& aTo, BOOL bCaseSensitive = FALSE);
 	int AddUniqueItems(const CDWordArray& aItems, CDWordArray& aTo);
@@ -203,6 +204,7 @@ namespace Misc
 	BOOL HasEmpty(const CStringArray& aItems);
 	CString Last(const CStringArray& aText);
 	CString& Last(CStringArray& aText);
+	void Reverse(CString& sText);
 
 	int FindNextOneOf(const CString& sSearchForOneOf, const CString& sSearchIn, BOOL bForward, int nStartPos = -1);
 	int FindFirstOf(const CString& sSearchFor, const CString& sSearchIn, BOOL bCaseSensitive = FALSE);
@@ -243,11 +245,13 @@ namespace Misc
 	BOOL IsScreenSaverActive();
 	BOOL IsScreenReaderActive(BOOL bCheckForMSNarrator = TRUE);
 	BOOL IsMSNarratorActive();
-	LANGID GetUserDefaultUILanguage();
-	LANGID GetUserKeyboardLanguage();
 	BOOL IsMetricMeasurementSystem();
 	BOOL IsHighContrastActive();
 	BOOL IsFullScreenAppActive();
+
+	LANGID GetUserDefaultUILanguage();
+	LANGID GetUserKeyboardLanguage();
+	LANGID GetPrimaryLanguage();
 
 	BOOL ShutdownBlockReasonCreate(HWND hWnd, LPCTSTR szReason);
 	BOOL ShutdownBlockReasonDestroy(HWND hWnd);

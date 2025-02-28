@@ -477,12 +477,8 @@ BOOL CTDLTaskAttributeListCtrl::WantAddAttribute(TDC_ATTRIBUTE nAttribID) const
 {
 	switch (nAttribID)
 	{
-	case TDCA_PROJECTNAME:
-	case TDCA_COMMENTS:
-		return FALSE;
-
-	case TDCA_TASKNAME:
-		return TRUE;
+	case TDCA_COMMENTS:	return FALSE;
+	case TDCA_TASKNAME:	return TRUE;
 
 	case TDCA_ICON:
 		// Always show the icon field unless explicitly hidden
@@ -510,7 +506,7 @@ int CTDLTaskAttributeListCtrl::GetGroupAttributes(TDC_ATTRIBUTEGROUP nGroup, CMa
 	{
 		for (int nAtt = 1; nAtt < ATTRIB_COUNT; nAtt++)
 		{
-			const TDCATTRIBUTE& attrib = ATTRIBUTES[nAtt];
+			const TDCATTRIBUTE& attrib = TASKATTRIBUTES[nAtt];
 
 			if ((attrib.nGroup == nGroup) && WantAddAttribute(attrib.nAttributeID))
 				mapAttrib[attrib.nAttributeID] = CEnString(attrib.nAttribResID);
@@ -553,12 +549,10 @@ int CTDLTaskAttributeListCtrl::GetGroupAttributes(TDC_ATTRIBUTEGROUP nGroup, CMa
 			if (attribDef.bEnabled)
 			{
 				TDC_ATTRIBUTE nAttribID = attribDef.GetAttributeID();
-				CEnString sAttrib(IDS_CUSTOMCOLUMN, attribDef.sLabel);
-
-				mapAttrib[nAttribID] = sAttrib;
+				mapAttrib[nAttribID] = attribDef.sLabel;
 
 				if (attribDef.IsDataType(TDCCA_DATE) && attribDef.HasFeature(TDCCAF_SHOWTIME))
-					mapAttrib[CUSTOMTIMEATTRIBID(nAttribID)] = sAttrib;
+					mapAttrib[CUSTOMTIMEATTRIBID(nAttribID)] = attribDef.sLabel;
 			}
 		}
 	}
@@ -614,7 +608,7 @@ void CTDLTaskAttributeListCtrl::Populate()
 		{
 			// Built-in attributes
 			for (int nAtt = 1; nAtt < ATTRIB_COUNT; nAtt++)
-				CheckAddAttribute(ATTRIBUTES[nAtt].nAttributeID, ATTRIBUTES[nAtt].nAttribResID);
+				CheckAddAttribute(TASKATTRIBUTES[nAtt].nAttributeID, TASKATTRIBUTES[nAtt].nAttribResID);
 
 			// Associated time fields
 			CheckAddAttribute(TDCA_STARTTIME, IDS_TDLBC_STARTTIME);
@@ -1254,18 +1248,11 @@ else bValueVaries = TRUE; }
 
 // -----------------------------------------------------------------------------------------
 
-#define GETMULTIVALUE_DATE(DT, ANDTIME)							\
+#define GETMULTIVALUE_DATETIME(DT)								\
 { COleDateTime value;											\
 if (m_multitasker.GetTasksDate(m_aSelectedTaskIDs, DT, value))	\
-{ sValue = FormatDate(value, ANDTIME); }						\
-else { sValue = DATETIME_VARIES; bValueVaries = TRUE; } }
-
-// -----------------------------------------------------------------------------------------
-
-#define GETMULTIVALUE_TIME(DT)									\
-{ COleDateTime value;											\
-if (m_multitasker.GetTasksDate(m_aSelectedTaskIDs, DT, value))	\
-{ sValue = FormatTime(value, TRUE); }							\
+{ if (CDateHelper::IsDateSet(value))							\
+sValue = Misc::Format(value.m_dt); }							\
 else { sValue = DATETIME_VARIES; bValueVaries = TRUE; } }
 
 // -----------------------------------------------------------------------------------------
@@ -1388,15 +1375,15 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(int nRow)
 		}
 		break;
 
-	case TDCA_DONEDATE:			GETMULTIVALUE_DATE(TDCD_DONEDATE, FALSE);		break;
-	case TDCA_DUEDATE:			GETMULTIVALUE_DATE(TDCD_DUEDATE, FALSE);		break;
-	case TDCA_STARTDATE:		GETMULTIVALUE_DATE(TDCD_STARTDATE, FALSE);		break;
-	case TDCA_LASTMODDATE:		GETMULTIVALUE_DATE(TDCD_LASTMOD, TRUE);			break;
-	case TDCA_CREATIONDATE:		GETMULTIVALUE_DATE(TDCD_CREATE, TRUE);			break;
+	case TDCA_DONEDATE:			GETMULTIVALUE_DATETIME(TDCD_DONEDATE);			break;
+	case TDCA_DUEDATE:			GETMULTIVALUE_DATETIME(TDCD_DUEDATE);			break;
+	case TDCA_STARTDATE:		GETMULTIVALUE_DATETIME(TDCD_STARTDATE);			break;
+	case TDCA_LASTMODDATE:		GETMULTIVALUE_DATETIME(TDCD_LASTMOD);			break;
+	case TDCA_CREATIONDATE:		GETMULTIVALUE_DATETIME(TDCD_CREATE);			break;
 
-	case TDCA_DONETIME:			GETMULTIVALUE_TIME(TDCD_DONETIME);				break;
-	case TDCA_DUETIME:			GETMULTIVALUE_TIME(TDCD_DUETIME);				break;
-	case TDCA_STARTTIME:		GETMULTIVALUE_TIME(TDCD_STARTTIME);				break;
+	case TDCA_DONETIME:			GETMULTIVALUE_DATETIME(TDCD_DONETIME);			break;
+	case TDCA_DUETIME:			GETMULTIVALUE_DATETIME(TDCD_DUETIME);			break;
+	case TDCA_STARTTIME:		GETMULTIVALUE_DATETIME(TDCD_STARTTIME);			break;
 
 	case TDCA_POSITION:			GETUNIQUEVALUE(m_formatter.GetTaskPosition);	break;
 	case TDCA_ID:				GETUNIQUEVALUE(Misc::Format);					break;
@@ -1748,6 +1735,33 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 
 	switch (nAttribID)
 	{
+	case TDCA_STARTDATE:
+	case TDCA_DUEDATE:
+	case TDCA_DONEDATE:
+		if (!sText.IsEmpty())
+		{
+			CString sDate(FormatDate(_ttof(sText), FALSE));
+			CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sDate, crText, nDrawTextFlags);
+		}
+		return;
+
+	case TDCA_STARTTIME:
+	case TDCA_DUETIME:
+	case TDCA_DONETIME:
+		{
+			CString sDate(FormatTime(_ttof(sText), FALSE));
+			CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sDate, crText, nDrawTextFlags);
+		}
+		return;
+
+	case TDCA_LASTMODDATE:
+	case TDCA_CREATIONDATE:
+		{
+			CString sDate(FormatDate(_ttof(sText), TRUE));
+			CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sDate, crText, nDrawTextFlags);
+		}
+		return;
+
 	case TDCA_TIMEESTIMATE:
 	case TDCA_TIMESPENT:
 		{
@@ -1978,11 +1992,15 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 			default:
 				if (pDef->IsMultiList())
 				{
-					CString sMatched(sText), sUnused;
-					Misc::Split(sMatched, sUnused, MIXED_DELIM);
+					CString sChecked = Misc::SplitLeft(sText, MIXED_DELIM);
 
-					CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sMatched, crText, nDrawTextFlags);
-					return;
+					if (!sChecked.IsEmpty())
+					{
+						sChecked.Replace(ITEM_DELIM, Misc::GetListSeparator());
+
+						CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sChecked, crText, nDrawTextFlags);
+						return;
+					}
 				}
 				break;
 			}
@@ -2150,41 +2168,39 @@ CString CTDLTaskAttributeListCtrl::GetVersion() const
 
 COleDateTime CTDLTaskAttributeListCtrl::GetStartDate() const
 {
-	COleDateTime date;
-	CDateHelper::DecodeDate(GetValueText(TDCA_STARTDATE), date, FALSE);
-
-	return date;
+	return GetDateTime(TDCA_STARTDATE);
 }
 
 COleDateTime CTDLTaskAttributeListCtrl::GetDueDate() const
 {
-	COleDateTime date;
-	CDateHelper::DecodeDate(GetValueText(TDCA_DUEDATE), date, FALSE);
-
-	return date;
+	return GetDateTime(TDCA_DUEDATE);
 }
 
 COleDateTime CTDLTaskAttributeListCtrl::GetDoneDate() const
 {
-	COleDateTime date;
-	CDateHelper::DecodeDate(GetValueText(TDCA_DONEDATE), date, FALSE);
-
-	return date;
+	return GetDateTime(TDCA_DONEDATE);
 }
 
 COleDateTime CTDLTaskAttributeListCtrl::GetStartTime() const
 {
-	return (CTimeHelper::DecodeClockTime(GetValueText(TDCA_STARTTIME)) / 24);
+	return GetDateTime(TDCA_STARTTIME);
 }
 
 COleDateTime CTDLTaskAttributeListCtrl::GetDueTime() const
 {
-	return (CTimeHelper::DecodeClockTime(GetValueText(TDCA_DUETIME)) / 24);
+	return GetDateTime(TDCA_DUETIME);
 }
 
 COleDateTime CTDLTaskAttributeListCtrl::GetDoneTime() const
 {
-	return (CTimeHelper::DecodeClockTime(GetValueText(TDCA_DONETIME)) / 24);
+	return GetDateTime(TDCA_DONETIME);
+}
+
+COleDateTime CTDLTaskAttributeListCtrl::GetDateTime(TDC_ATTRIBUTE nAttribID) const
+{
+	CString sValue = GetValueText(nAttribID);
+
+	return (sValue.IsEmpty() ? CDateHelper::NullDate() : _ttof(sValue));
 }
 
 int CTDLTaskAttributeListCtrl::GetCustomAttributeAutoListData(const CString& sAttribID, CStringArray& aItems) const
@@ -2333,16 +2349,27 @@ BOOL CTDLTaskAttributeListCtrl::CheckRecreateCombo(int nRow, CEnCheckComboBox& c
 	return TRUE;
 }
 
+void CTDLTaskAttributeListCtrl::RebuildCombo(CEnCheckComboBox& combo, const CStringArray& aDefValues, const CStringArray& aUserValues, BOOL bMultiSel, BOOL bWantSort)
+{
+	combo.ModifyStyle(bWantSort ? 0 : CBS_SORT, bWantSort ? CBS_SORT : 0);
+	combo.EnableMultiSelection(bMultiSel);
+
+	CStringArray aAllValues;
+	
+	aAllValues.Copy(aDefValues);
+	aAllValues.Append(aUserValues);
+	Misc::RemoveDuplicates(aAllValues);
+
+	CDialogHelper::SetComboBoxItems(combo, aAllValues);
+}
+
 void CTDLTaskAttributeListCtrl::PrepareMultiSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo, BOOL bWantSort)
 {
+	// Populate
 	CheckRecreateCombo(nRow, combo);
+	RebuildCombo(combo, aDefValues, aUserValues, TRUE, bWantSort);
 
-	combo.ModifyStyle(bWantSort ? 0 : CBS_SORT, bWantSort ? CBS_SORT : 0);
-	combo.EnableMultiSelection(TRUE);
-	combo.ResetContent();
-	combo.AddStrings(aDefValues);
-	combo.AddUniqueItems(aUserValues);
-
+	// Set selection
 	CStringArray aMatched, aMixed;
 	ParseMultiSelValues(GetItemText(nRow, VALUE_COL), aMatched, aMixed);
 
@@ -2351,14 +2378,11 @@ void CTDLTaskAttributeListCtrl::PrepareMultiSelCombo(int nRow, const CStringArra
 
 void CTDLTaskAttributeListCtrl::PrepareSingleSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo, BOOL bWantSort)
 {
+	// Populate
 	CheckRecreateCombo(nRow, combo);
+	RebuildCombo(combo, aDefValues, aUserValues, FALSE, bWantSort);
 
-	combo.ModifyStyle(bWantSort ? 0 : CBS_SORT, bWantSort ? CBS_SORT : 0);
-	combo.EnableMultiSelection(FALSE);
-	combo.ResetContent();
-	combo.AddStrings(aDefValues);
-	combo.AddUniqueItems(aUserValues);
-
+	// Set selection
 	CString sValue = GetItemText(nRow, VALUE_COL);
 	combo.AddUniqueItem(sValue);
 
@@ -2596,12 +2620,10 @@ void CTDLTaskAttributeListCtrl::PrepareDatePicker(int nRow, TDC_ATTRIBUTE nFallb
 		sValue = GetValueText(nFallbackDate);
 	}
 
-	COleDateTime date;
-
-	if (CDateHelper::DecodeDate(sValue, date, FALSE))
-		m_datePicker.SetTime(date);
-	else
+	if (sValue.IsEmpty())
 		m_datePicker.SendMessage(DTM_SETSYSTEMTIME, GDT_NONE, 0);
+	else
+		m_datePicker.SetTime(_ttof(sValue));
 
 	m_datePicker.SetMonthCalStyle(MCS_WEEKNUMBERS);
 }
@@ -2611,9 +2633,9 @@ void CTDLTaskAttributeListCtrl::PrepareTimeOfDayCombo(int nRow)
 	CString sValue = GetItemText(nRow, VALUE_COL);
 
 	if (sValue.IsEmpty() || (sValue == DATETIME_VARIES))
-		m_cbTimeOfDay.Set24HourTime(-1);
+		m_cbTimeOfDay.SetOleTime(-1);
 	else
-		m_cbTimeOfDay.Set24HourTime(CTimeHelper::DecodeClockTime(sValue));
+		m_cbTimeOfDay.SetOleTime(_ttof(sValue));
 
 	DWORD dwStyle = m_cbTimeOfDay.GetStyle();
 	Misc::SetFlag(dwStyle, TCB_ISO, m_data.HasStyle(TDCS_SHOWDATESINISO));
@@ -3253,10 +3275,10 @@ void CTDLTaskAttributeListCtrl::OnComboSelChange(UINT nCtrlID)
 
 	case IDC_TIME_PICKER:
 		{
-			double dTime = m_cbTimeOfDay.Get24HourTime();
+			double dTime = m_cbTimeOfDay.GetOleTime();
 
 			if (dTime != 0.0)
-				sNewValue = CTimeHelper::FormatClockTime(dTime / 24);
+				sNewValue = Misc::Format(dTime);
 
 			// If the combo is visible, use the cell value as a 
 			// scratch pad but WITHOUT notifying the parent
@@ -3485,7 +3507,9 @@ void CTDLTaskAttributeListCtrl::OnDateChange(NMHDR* pNMHDR, LRESULT* pResult)
 		{
 			// Use the cell text as a scratch-pad for storing intermediate
 			// date edits but without notifying our parent
-			VERIFY(SetItemText(GetCurSel(), VALUE_COL, m_formatter.GetDateOnly(pNMDTC->st, TRUE)));
+			COleDateTime date(pNMDTC->st);
+
+			VERIFY(SetItemText(GetCurSel(), VALUE_COL, Misc::Format(date.m_dt)));
 		}
 	}
 
@@ -3645,9 +3669,7 @@ BOOL CTDLTaskAttributeListCtrl::CFileDropTarget::OnDrop(CWnd* pWnd, COleDataObje
 		SplitValueArray(m_pAttributeList->GetItemText(nRow, VALUE_COL), aExisting);
 
 		if (Misc::AddUniqueItems(aFiles, aExisting))
-		{
 			m_pAttributeList->SetValueText(nRow, FormatValueArray(aExisting));
-		}
 	}
 
 	return TRUE;
