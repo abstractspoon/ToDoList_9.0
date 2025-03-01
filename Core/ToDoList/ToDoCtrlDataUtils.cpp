@@ -3552,7 +3552,7 @@ void CTDCTaskCalculator::AdjustOperandValueForEndOfDay(const TDCCUSTOMATTRIBUTEC
 {
 	// A 'Due Date' without a time component requires special handling when 
 	// subtracting it from another date (or vice versa) because it needs to 
-	// be treated as 'end of day'. Same with 'Done Date'.
+	// be treated as 'end of day'.
 	if (dValue == 0.0)
 		return;
 
@@ -3565,7 +3565,6 @@ void CTDCTaskCalculator::AdjustOperandValueForEndOfDay(const TDCCUSTOMATTRIBUTEC
 	switch (op.nAttributeID)
 	{
 	case TDCA_DUEDATE:
-	case TDCA_DONEDATE:
 		if (CDateHelper::DateHasTime(dValue))
 			return;
 		break;
