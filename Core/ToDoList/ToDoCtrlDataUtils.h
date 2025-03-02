@@ -111,6 +111,7 @@ protected:
 	BOOL GetSecondCustomAttributeOperandValue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTECALCULATION& calc, double& dValue, TDC_UNITS nUnits, BOOL bAggregated) const;
 	BOOL GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_ATTRIBUTE nAttribID, double& dValue, TDC_UNITS nUnits, BOOL bAggregated) const;
 	BOOL GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue, TDC_UNITS nUnits, BOOL bAggregated) const;
+	BOOL CustomAttributeOperandDerivesFromDueDate(const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& op) const;
 
 	// Recursive functions hardened against stack overflows
 	BOOL IsTaskFlagged(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CDWordSet& mapProcessedIDs) const;
@@ -130,12 +131,6 @@ protected:
 	int GetTaskRisk(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CDWordSet& mapProcessedIDs) const;
 	int GetTaskLeafCount(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bIncludeDone, CDWordSet& mapProcessedIDs) const;
 	const TODOITEM* GetLastModifiedTask(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CDWordSet& mapProcessedIDs) const;
-
-	void AdjustOperandValueForEndOfDay(const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& op, 
-									   TDCCA_CALC_OPERATOR nOperator,
-									   const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& opOther,
-									   double& dValue, 
-									   TDC_UNITS nUnits) const;
 
 	static double GetLatestDate(double dDate1, double dDate2, BOOL bNoTimeIsEndOfDay);
 	static double GetEarliestDate(double dDate1, double dDate2, BOOL bNoTimeIsEndOfDay);
