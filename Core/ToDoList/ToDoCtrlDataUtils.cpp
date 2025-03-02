@@ -3565,8 +3565,8 @@ BOOL CTDCTaskCalculator::CustomAttributeOperandDerivesFromDueDate(const TDCCUSTO
 
 		if (pDef->IsCalculation())
 		{
-			const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& opFirst(pDef->Calculation().opFirst);
-			const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& opSecond(pDef->Calculation().opSecond);
+			const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& opFirst = pDef->Calculation().opFirst;
+			const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& opSecond = pDef->Calculation().opSecond;
 
 			if (CustomAttributeOperandDerivesFromDueDate(opFirst)) // RECURSIVE CALL
 			{
