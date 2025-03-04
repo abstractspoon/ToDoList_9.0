@@ -114,7 +114,10 @@ namespace DayViewUIExtension
 				break;
 			}
 
-			String day = (iso ? "dd" : "d");
+			// Note the trailing space in 'd ' required because
+			// otherwise .Net will return the whole short date
+			// if the format string ends up just as 'd'
+			String day = (iso ? "dd" : "d ");
 
 			// Day of month
 			if (firstDay || (date.Day == 1))
