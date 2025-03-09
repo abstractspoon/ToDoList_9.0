@@ -232,6 +232,8 @@ public:
 	CString GetDependencies(const CTDCDependencyArray& aDepends, TCHAR cSep = 0) const;
 	CString GetTimePeriod(double dTime, TDC_UNITS nUnits, BOOL bAllowNegative) const;
 	
+	BOOL WantFormatValue(double dValue, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef) const;
+	
 protected:
 	const CToDoCtrlData& m_data;
 	const CContentMgr& m_mgrContent;
