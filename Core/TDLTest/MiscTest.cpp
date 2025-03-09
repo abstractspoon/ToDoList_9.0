@@ -389,6 +389,8 @@ void CMiscTest::TestAtof(const CString& sLocale)
 
 void CMiscTest::TestRemoveDuplicates()
 {
+	CTDCScopedTest test(*this, _T("Misc::RemoveDuplicates"));
+
 	// Case sensitive
 	{
 		// No duplicates exist
@@ -455,7 +457,7 @@ void CMiscTest::TestRemoveDuplicates()
 		aItems.Add(_T("AbC"));
 		aItems.Add(_T("ABc"));
 
-		ExpectEQ(Misc::RemoveDuplicates(aItems, TRUE), 6);
+		ExpectEQ(Misc::RemoveDuplicates(aItems, FALSE), 6);
 		ExpectEQ(aItems.GetSize(), 1);
 
 		ExpectEQ(aItems[0], _T("abc")); // only the first item remains
