@@ -1439,16 +1439,16 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(int nRow)
 						sValue = data.AsString();
 						break;
 
+					case TDCCA_DATE:
+						sValue = Misc::Format(CDateHelper::GetDateOnly(data.AsDate()));
+						break;
+
 					case TDCCA_CALCULATION:
 						sValue = m_formatter.GetTaskCustomAttributeData(m_aSelectedTaskIDs[0], *pDef);
 						break;
 
 					case TDCCA_TIMEPERIOD:
 						sValue = pDef->FormatTimePeriod(data);
-						break;
-
-					case TDCCA_DATE:
-						sValue = data.FormatAsDate(m_data.HasStyle(TDCS_SHOWDATESINISO), FALSE);
 						break;
 
 					case TDCCA_BOOL:
@@ -1471,7 +1471,7 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(int nRow)
 			TDCCADATA data;
 
 			if (m_multitasker.GetTasksCustomAttributeData(m_aSelectedTaskIDs, *pDef, data))
-				sValue = CTimeHelper::FormatClockTime(data.AsDate(), FALSE, m_data.HasStyle(TDCS_SHOWDATESINISO));
+				sValue = Misc::Format(CDateHelper::GetTimeOnly(data.AsDate()));
 			else
 				bValueVaries = TRUE;
 		}
@@ -1989,6 +1989,14 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 				CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, pDef->FormatNumber(Misc::Atof(sText)), crText, nDrawTextFlags);
 				return;
 
+			case TDCCA_DATE:
+				if (!sText.IsEmpty())
+				{
+					CString sDate(FormatDate(_ttof(sText), FALSE));
+					CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sDate, crText, nDrawTextFlags);
+				}
+				return;
+
 			default:
 				if (pDef->IsMultiList())
 				{
@@ -2004,6 +2012,13 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 				}
 				break;
 			}
+		}
+		else if (IsCustomTime(nAttribID))
+		{
+			CString sDate(FormatTime(_ttof(sText), FALSE));
+			CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sDate, crText, nDrawTextFlags);
+
+			return;
 		}
 		break;
 	}
@@ -2232,14 +2247,14 @@ BOOL CTDLTaskAttributeListCtrl::GetCustomAttributeData(const CString& sAttribID,
 	}
 	else if (pDef->IsDataType(TDCCA_DATE))
 	{
-		COleDateTime date;
+		COleDateTime date(_ttof(sValue));
 		
-		if (CDateHelper::DecodeDate(sValue, date, FALSE))
+		if (CDateHelper::IsDateSet(date))
 		{
 			if (pDef->HasFeature(TDCCAF_SHOWTIME))
 			{
 				TDC_ATTRIBUTE nTimeAttribID = CUSTOMTIMEATTRIBID(nAttribID);
-				date.m_dt += (CTimeHelper::DecodeClockTime(GetValueText(nTimeAttribID)) / 24);
+				date.m_dt += _ttof(GetValueText(nTimeAttribID));
 			}
 
 			data.Set(date);
