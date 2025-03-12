@@ -1524,6 +1524,7 @@ BOOL CTDLTaskAttributeListCtrl::GetButtonRect(int nRow, int nCol, CRect& rBtn) c
 				break;
 			}
 		}
+		break;
 	}
 
 	return TRUE;
@@ -3126,6 +3127,7 @@ HICON CTDLTaskAttributeListCtrl::GetButtonIcon(TDC_ATTRIBUTE nAttribID, int nBtn
 
 	default:
 		ASSERT(0);
+		break;
 	}
 
 	return NULL;
@@ -3163,6 +3165,7 @@ BOOL CTDLTaskAttributeListCtrl::CanClickButton(TDC_ATTRIBUTE nAttribID, int nBtn
 
 	default:
 		ASSERT(0);
+		break;
 	}
 
 	return FALSE;
@@ -3560,6 +3563,7 @@ LRESULT CTDLTaskAttributeListCtrl::OnAutoComboAddDelete(WPARAM wp, LPARAM lp)
 			CDialogHelper::GetComboBoxItems(m_cbTextAndNumbers, pDef->aAutoListData);
 			Misc::RemoveItems(pDef->aDefaultListData, pDef->aAutoListData);
 		}
+		break;
 	}
 
 	return GetParent()->SendMessage(WM_TDCN_AUTOITEMADDEDDELETED, nAttribID);
