@@ -2636,7 +2636,7 @@ void CTDLTaskAttributeListCtrl::PrepareDatePicker(int nRow, TDC_ATTRIBUTE nFallb
 		sValue = GetValueText(nFallbackDate);
 	}
 
-	if (sValue.IsEmpty())
+	if (sValue.IsEmpty() || (sValue == DATETIME_VARIES))
 		m_datePicker.SendMessage(DTM_SETSYSTEMTIME, GDT_NONE, 0);
 	else
 		m_datePicker.SetTime(_ttof(sValue));
