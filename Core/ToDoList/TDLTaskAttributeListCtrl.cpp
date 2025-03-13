@@ -3479,29 +3479,26 @@ void CTDLTaskAttributeListCtrl::OnDateCloseUp(NMHDR* pNMHDR, LRESULT* pResult)
 				!m_datePicker.GetDropButtonRect().PtInRect(ptMsg))
 			{
 				// Must have clicked in the date/time portion
-				// so DON'T hide the date picker
+				// so DON'T hide the date picker itself
 				return;
 			}
 		}
 
+		// Note: HideControl will call HandleDateEditCompletion
+		// via OnDateKillFocus so we don't need to
 		HideControl(m_datePicker);
 	}
-
-	// If we've got multiple different values, DON'T notify
-	// our parent if the cell text has not actually changed
-	int nRow = GetCurSel();
-
-	if (RowValueVaries(nRow) && (GetItemText(nRow, VALUE_COL) == DATETIME_VARIES))
-		return;
-	
-	NotifyParentEdit(nRow);
+	else
+	{
+		HandleDateEditCompletion();
+	}
 
 	*pResult = 0;
 }
 
 void CTDLTaskAttributeListCtrl::OnDateKillFocus(NMHDR* pNMHDR, LRESULT* pResult)
 {
-	OnDateCloseUp(pNMHDR, pResult);
+	HandleDateEditCompletion();
 }
 
 void CTDLTaskAttributeListCtrl::OnDateChange(NMHDR* pNMHDR, LRESULT* pResult)
@@ -3519,7 +3516,7 @@ void CTDLTaskAttributeListCtrl::OnDateChange(NMHDR* pNMHDR, LRESULT* pResult)
 			// Clear the text and end the edit, triggering a parent notification
 			VERIFY(SetItemText(GetCurSel(), VALUE_COL, _T("")));
 			
-			OnDateCloseUp(pNMHDR, pResult);
+			HandleDateEditCompletion();
 		}
 		else
 		{
@@ -3532,6 +3529,21 @@ void CTDLTaskAttributeListCtrl::OnDateChange(NMHDR* pNMHDR, LRESULT* pResult)
 	}
 
 	*pResult = 0;
+}
+
+void CTDLTaskAttributeListCtrl::HandleDateEditCompletion()
+{
+	// If we've got multiple different values, DON'T notify
+	// our parent if the cell text has not actually changed
+	int nRow = GetCurSel();
+	CString sValue = GetItemText(nRow, VALUE_COL);
+
+	if (RowValueVaries(nRow) && (sValue == DATETIME_VARIES))
+		return;
+
+	TRACE(_T("\nCalling NotifyParentEdit(%d, \"%s\")\n"), nRow, sValue);
+
+	NotifyParentEdit(nRow);
 }
 
 LRESULT CTDLTaskAttributeListCtrl::OnAutoComboAddDelete(WPARAM wp, LPARAM lp)
