@@ -4217,11 +4217,11 @@ int CTDLTaskAttributeListCtrl::CSortedGroupItemArray::GetNextItem(int nKeyPress)
 	switch (nKeyPress)
 	{
 	case VK_DOWN:	
-		nNext = (nFrom + 1);	
+		nNext = (nFrom + 1);
 		break;
 	
 	case VK_UP:		
-		nNext = (nFrom - 1);	
+		nNext = (nFrom - 1);
 		break;
 
 	case VK_NEXT:	
@@ -4233,11 +4233,11 @@ int CTDLTaskAttributeListCtrl::CSortedGroupItemArray::GetNextItem(int nKeyPress)
 		break;
 
 	case VK_END:	
-		nNext = (nNumItems - 1);	
+		nNext = (nNumItems - 1);
 		break;
 	
 	case VK_HOME:	
-		nNext = 0;	
+		nNext = 0;
 		break;
 
 	default:
