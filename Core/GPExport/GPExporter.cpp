@@ -506,10 +506,10 @@ void CGPExporter::ExportDependencies(const ITASKLISTBASE* pSrcTaskFile, HTASKITE
 					
 					pXIDepends->AddItem(_T("id"), nDependeeID);
 					pXIDepends->AddItem(_T("type"), 2);
+					pXIDepends->AddItem(_T("hardness"), _T("Strong"));
 
 					if (nDaysLeadIn != 0)
 						pXIDepends->AddItem(_T("difference"), nDaysLeadIn);
-
 				}
 			}
 		}
