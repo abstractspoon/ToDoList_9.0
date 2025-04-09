@@ -79,7 +79,7 @@ public:
 	
 	void RefreshUserPreferences() { m_lcResults.RefreshUserPreferences(); }
 	void SetUITheme(const CUIThemeFile& theme);
-	void SetResultsFont(HFONT hFont) { m_lcResults.SendMessage(WM_SETFONT, (WPARAM)hFont, TRUE); }
+	void SetResultsFont(HFONT hFont);
 
 	BOOL IsDocked() const { return IsDocked(m_nDockPos); }
 	DM_POS GetDockPosition() const { return m_nDockPos; }
@@ -118,6 +118,7 @@ protected:
 	CIcon m_icon;
 	CSize m_sizeDocked, m_sizeDockedMax;
 	CRect m_rUndocked;
+	HFONT m_hResultsFont;
 
 // Overrides
 protected:
