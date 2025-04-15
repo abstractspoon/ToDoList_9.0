@@ -4052,8 +4052,10 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(const CTDCAttributeMap& mapA
 			dwFlags |= TDCGSTF_APPENDREFERENCES;
 		}
 	
-		if (mapAttribIDs.Has(TDCA_DEPENDENCY))
+		if (bUndo || mapAttribIDs.Has(TDCA_DEPENDENCY))
+		{
 			dwFlags |= TDCGSTF_LOCALDEPENDENTS;
+		}
 	}
 
 	// Get the tasks for the update
