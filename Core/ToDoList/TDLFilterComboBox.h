@@ -23,8 +23,7 @@ public:
 public:
 	FILTER_SHOW GetSelectedFilter() const;
 	FILTER_SHOW GetSelectedFilter(CString& sAdvanced) const;
-	BOOL SelectFilter(FILTER_SHOW nFilter);
-	BOOL SelectAdvancedFilter(const CString& sAdvanced);
+	BOOL SelectFilter(FILTER_SHOW nShow, LPCTSTR szAdvFilter = NULL);
 	
 	void AddAdvancedFilters(const CStringArray& aFilters, LPCTSTR szAdvancedSel = NULL);
 	const CStringArray& GetAdvancedFilterNames() const;
@@ -58,8 +57,8 @@ protected:
 protected:
 	void FillCombo();
 	void RefillCombo(LPCTSTR szAdvancedSel = NULL);
-	void RestoreSelection(FILTER_SHOW nFilter, LPCTSTR szAdvanced = NULL);
 	int AddDefaultFilterItem(int nItem);
+	int GetDefaultFilterCount() const;
 
 	static CString FormatAdvancedFilterDisplayString(int nFilter, const CString& sFilter);
 	static BOOL ExtractAdvancedFilterName(const CString& sDisplay, CString& sFilter);

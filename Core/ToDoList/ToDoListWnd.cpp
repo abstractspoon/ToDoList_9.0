@@ -7394,7 +7394,7 @@ void CToDoListWnd::OnViewActivateFilter(UINT nCmdID)
 		return;
 	}
 
-	VERIFY(m_filterBar.SelectFilter(nFilter));
+	m_filterBar.SelectFilter((FILTER_SHOW)(nFilter + FS_ALL));
 }
 
 void CToDoListWnd::OnViewActivateAdvancedFilter(UINT nCmdID)
@@ -7407,9 +7407,12 @@ void CToDoListWnd::OnViewActivateAdvancedFilter(UINT nCmdID)
 		return;
 	}
 
-	int nNumDefaultFilters = (Prefs().GetShowDefaultFiltersInFilterBar() ? NUM_SHOWFILTER : 1);
+	if (nCustomFilter >= m_filterBar.GetAdvancedFilterNames().GetSize())
+		return;
 
-	VERIFY(m_filterBar.SelectFilter(nNumDefaultFilters + nCustomFilter));
+	CString sAdvFilter = m_filterBar.GetAdvancedFilterNames()[nCustomFilter];
+
+	VERIFY(m_filterBar.SelectFilter(FS_ADVANCED, sAdvFilter));
 }
 
 void CToDoListWnd::OnShowTaskView(UINT nCmdID) 
@@ -11814,6 +11817,7 @@ void CToDoListWnd::OnViewFilter()
 	
 	CTDLFilterDlg dialog(prefs.GetTitleFilterOption(),
 						 prefs.GetMultiSelFilters(),
+						 prefs.GetShowDefaultFiltersInFilterBar(),
 						 m_filterBar.GetAdvancedFilterNames(),
 						 GetToDoCtrl(),
 						 aPriorityColors);

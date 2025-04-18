@@ -22,12 +22,13 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CTDLFilterDlg dialog
 
-CTDLFilterDlg::CTDLFilterDlg(FILTER_TITLE nTitleFilter, 
-							BOOL bMultiSelFilters, 
-							const CStringArray& aAdvFilterNames,
-							const CFilteredToDoCtrl& tdc, 
-							const CDWordArray& aPriorityColors,
-							CWnd* pParent /*=NULL*/)
+CTDLFilterDlg::CTDLFilterDlg(FILTER_TITLE nTitleFilter,
+							 BOOL bMultiSelFilters,
+							 BOOL bShowDefaultFilters,
+							 const CStringArray& aAdvFilterNames,
+							 const CFilteredToDoCtrl& tdc,
+							 const CDWordArray& aPriorityColors,
+							 CWnd* pParent /*=NULL*/)
 	: 
 	CTDLDialog(CTDLFilterDlg::IDD, _T("Filtering"), pParent), 
 	m_cbCategoryFilter(bMultiSelFilters, IDS_TDC_NONE, IDS_TDC_ANY),
@@ -67,9 +68,9 @@ CTDLFilterDlg::CTDLFilterDlg(FILTER_TITLE nTitleFilter,
 	// auto-droplists
 	tdc.GetAutoListData(TDCA_ALL, m_tldListData);
 
+	m_cbShowFilter.ShowDefaultFilters(bShowDefaultFilters);
 	m_cbPriorityFilter.SetColors(aPriorityColors);
 }
-
 
 void CTDLFilterDlg::DoDataExchange(CDataExchange* pDX)
 {
@@ -130,11 +131,7 @@ void CTDLFilterDlg::DoDataExchange(CDataExchange* pDX)
 	else
 	{
 		// filter
-		if (m_filter.IsAdvanced())
-			m_cbShowFilter.SelectAdvancedFilter(m_sAdvancedFilter);
-		else
-			m_cbShowFilter.SelectFilter(m_filter.nShow);
-
+		m_cbShowFilter.SelectFilter(m_filter.nShow, m_sAdvancedFilter);
 		m_cbStartFilter.SelectFilter(m_filter.nStartBy);
 		m_cbDueFilter.SelectFilter(m_filter.nDueBy);
 

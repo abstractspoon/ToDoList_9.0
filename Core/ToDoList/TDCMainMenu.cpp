@@ -815,21 +815,24 @@ void CTDCMainMenu::PrepareFiltersActivationMenu(CMenu* pMenu, const CTDLFilterBa
 	AddFiltersToMenu(pMenu, ID_VIEW_ACTIVATEADVANCEDFILTER1, ID_VIEW_ACTIVATEADVANCEDFILTER24, filterBar.GetAdvancedFilterNames(), IDS_ADVANCEDFILTERPLACEHOLDER);
 
 	// Restore selection
-	int nSelFilter = filterBar.GetSelectedFilter();
+	CString sAdvFilter;
+	FILTER_SHOW nSelShow = filterBar.GetFilter(sAdvFilter);
 
-	if (filterBar.GetFilter() == FS_ADVANCED)
+	UINT nSelMenuID = 0;
+
+	if (nSelShow == FS_ADVANCED)
 	{
-		CString sFilter;
-		VERIFY((filterBar.GetFilter(sFilter) == FS_ADVANCED) && !sFilter.IsEmpty());
-
-		int nFilter = Misc::Find(sFilter, filterBar.GetAdvancedFilterNames(), FALSE, TRUE);
+		int nFilter = Misc::Find(sAdvFilter, filterBar.GetAdvancedFilterNames(), FALSE, TRUE);
 		ASSERT(nFilter != -1);
 
-		nSelFilter = (NUM_SHOWFILTER + 1 + nFilter); // +1 for separator
+		nSelMenuID = (ID_VIEW_ACTIVATEADVANCEDFILTER1 + nFilter);
+	}
+	else
+	{
+		nSelMenuID = (ID_VIEW_ACTIVATEFILTER1 + nSelShow - FS_ALL);
 	}
 
-	if (nSelFilter != -1)
-		pMenu->CheckMenuRadioItem(0, pMenu->GetMenuItemCount(), nSelFilter, MF_BYPOSITION);
+	pMenu->CheckMenuRadioItem(ID_VIEW_ACTIVATEFILTER1, ID_VIEW_ACTIVATEADVANCEDFILTER24, nSelMenuID, MF_BYCOMMAND);
 }
 
 void CTDCMainMenu::AddFiltersToMenu(CMenu* pMenu, UINT nStart, UINT nEnd, const CStringArray& aFilters, UINT nPlaceholderStrID)

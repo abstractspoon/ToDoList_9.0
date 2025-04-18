@@ -43,8 +43,7 @@ public:
 	FILTER_SHOW GetFilter(TDCFILTER& filter, CString& sCustom, DWORD& dwCustomFlags) const;
 	FILTER_SHOW GetFilter(CString& sCustom) const;
 
-	BOOL SelectFilter(int nFilter);
-	int GetSelectedFilter() const;
+	BOOL SelectFilter(FILTER_SHOW nShow, LPCTSTR szAdvFilter = NULL);
 
 	void AddAdvancedFilters(const CStringArray& aFilters);
 	const CStringArray& GetAdvancedFilterNames() const;

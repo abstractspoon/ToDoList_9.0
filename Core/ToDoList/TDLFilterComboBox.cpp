@@ -139,7 +139,13 @@ void CTDLFilterComboBox::RefillCombo(LPCTSTR szAdvancedSel)
 		FillCombo();
 		
 		// restore selection
-		RestoreSelection(nSelFilter, (szAdvancedSel ? szAdvancedSel : sAdvanced));
+		if (!SelectFilter(nSelFilter, (szAdvancedSel ? szAdvancedSel : sAdvanced)))
+		{
+			SelectFilter(FS_ALL);
+
+			// notify parent of selection change
+			GetParent()->SendMessage(WM_COMMAND, MAKEWPARAM(GetDlgCtrlID(), CBN_SELENDOK), (LPARAM)GetSafeHwnd());
+		}
 	}
 }
 
@@ -170,54 +176,48 @@ BOOL CTDLFilterComboBox::HasAdvancedFilter(const CString& sAdvanced) const
 	return (Misc::Find(sAdvanced, m_aAdvancedFilterNames, FALSE, TRUE) != -1);
 }
 
-BOOL CTDLFilterComboBox::SelectFilter(FILTER_SHOW nFilter)
+BOOL CTDLFilterComboBox::SelectFilter(FILTER_SHOW nFilter, LPCTSTR szAdvFilter)
 {
-	return (CB_ERR != CDialogHelper::SelectItemByDataT(*this, (DWORD)nFilter));
-}
+	ASSERT((nFilter != FS_ADVANCED) || !Misc::IsEmpty(szAdvFilter));
 
-BOOL CTDLFilterComboBox::SelectAdvancedFilter(const CString& sAdvFilter)
-{
-	for (int nItem = 0; nItem < GetCount(); nItem++)
+	if (nFilter != FS_ADVANCED)
 	{
-		if (FS_ADVANCED == GetItemData(nItem))
-		{
-			CString sFilter;
-			GetLBText(nItem, sFilter);
+		// This can fail if the default filters have been omitted
+		// so we don't want to change the selection in such cases
+		int nItem = CDialogHelper::FindItemByDataT(*this, (DWORD)nFilter);
 
-			// exact test
-			if (sFilter == sAdvFilter)
-			{
-				SetCurSel(nItem);
-				return TRUE;
-			}
-			// partial test
-			else if (sFilter.Find(sAdvFilter) != -1)
-			{
-				// then full test
-				int nFilter = nItem;
-				
-				if (m_bShowDefaultFilters)
-				{
-					nFilter -= NUM_SHOWFILTER;
-					nFilter -= 2; // Heading items
-				}
-				else
-				{
-					ASSERT(nFilter == 0);
-				}
-				
-				CString sFull = FormatAdvancedFilterDisplayString(nFilter, sAdvFilter);	
+		if (nItem == CB_ERR)
+			return FALSE;
 
-				if (sFilter == sFull)
-				{
-					SetCurSel(nItem);
-					return TRUE;
-				}
-			}
-		}
+		SetCurSel(nItem);
+		return TRUE;
 	}
 
-	return FALSE;
+	// else lookup advanced filter by name
+	int nAdvFilter = Misc::Find(szAdvFilter, m_aAdvancedFilterNames, TRUE, TRUE);
+
+	if (nAdvFilter == -1)
+		return FALSE;
+
+#ifdef _DEBUG
+	if (m_nNumHeadings == 0)
+	{
+		ASSERT(!m_bShowDefaultFilters || !m_aAdvancedFilterNames.GetSize());
+	}
+	else
+	{
+		ASSERT(GetDefaultFilterCount() == NUM_SHOWFILTER);
+		ASSERT(m_nNumHeadings == 2);
+		ASSERT(m_bShowDefaultFilters);
+		ASSERT(m_aAdvancedFilterNames.GetSize());
+	}
+#endif
+
+	int nIndex = (GetDefaultFilterCount() + nAdvFilter + m_nNumHeadings);
+
+	ASSERT(GetItemData(nIndex) == FS_ADVANCED);
+
+	return (SetCurSel(nIndex) != CB_ERR);
 }
 
 void CTDLFilterComboBox::AddAdvancedFilters(const CStringArray& aFilters, LPCTSTR szAdvancedSel)
@@ -252,23 +252,9 @@ void CTDLFilterComboBox::ShowDefaultFilters(BOOL bShow)
 		RefillCombo();
 }
 
-void CTDLFilterComboBox::RestoreSelection(FILTER_SHOW nFilter, LPCTSTR szAdvanced)
+int CTDLFilterComboBox::GetDefaultFilterCount() const
 {
-	if (nFilter == FS_ADVANCED)
-	{
-		if (SelectAdvancedFilter(szAdvanced))
-			return;
-	}
-	else if (SelectFilter(nFilter))
-	{
-		return;
-	}
-
-	// else
-	SetCurSel(0);
-
-	// notify parent of selection change
-	GetParent()->SendMessage(WM_COMMAND, MAKEWPARAM(GetDlgCtrlID(), CBN_SELCHANGE), (LPARAM)GetSafeHwnd());
+	return (m_bShowDefaultFilters ? NUM_SHOWFILTER : 1);
 }
 
 CString CTDLFilterComboBox::FormatAdvancedFilterDisplayString(int nFilter, const CString& sFilter)

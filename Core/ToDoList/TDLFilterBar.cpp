@@ -149,12 +149,8 @@ void CTDLFilterBar::DoDataExchange(CDataExchange* pDX)
 	}
 	else
 	{
-		// filter
-		if (m_filter.IsAdvanced())
-			m_cbShowFilter.SelectAdvancedFilter(m_sAdvancedFilter);
-		else
-			m_cbShowFilter.SelectFilter(m_filter.nShow);
-		
+		// filters
+		m_cbShowFilter.SelectFilter(m_filter.nShow, m_sAdvancedFilter);
 		m_cbStartFilter.SelectFilter(m_filter.nStartBy);
 		m_cbStartFilter.SetNextNDays(m_filter.nStartNextNDays);
 		m_cbDueFilter.SelectFilter(m_filter.nDueBy);
@@ -468,20 +464,13 @@ BOOL CTDLFilterBar::PreTranslateMessage(MSG* pMsg)
 	return CDialog::PreTranslateMessage(pMsg);
 }
 
-BOOL CTDLFilterBar::SelectFilter(int nFilter)
+BOOL CTDLFilterBar::SelectFilter(FILTER_SHOW nShow, LPCTSTR szAdvFilter)
 {
-	if (nFilter < 0 || nFilter >= m_cbShowFilter.GetCount())
+	if (!m_cbShowFilter.SelectFilter(nShow, szAdvFilter))
 		return FALSE;
 
-	m_cbShowFilter.SetCurSel(nFilter);
-	OnSelchangeFilter();
-
-	return TRUE;
-}
-
-int CTDLFilterBar::GetSelectedFilter() const
-{
-	return m_cbShowFilter.GetCurSel();
+ 	OnSelchangeFilter();
+ 	return TRUE;
 }
 
 FILTER_SHOW CTDLFilterBar::GetFilter(TDCFILTER& filter, CString& sCustom, DWORD& dwCustomFlags) const
