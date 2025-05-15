@@ -158,6 +158,8 @@ protected:
 
 	BOOL m_bGrouped;
 	BOOL m_bSplitting;
+	BOOL m_bTaskIDChangeSinceLastEdit; 
+
 	float m_fAttribColProportion;
 	DWORD m_dwTimeTrackingTask;
 
