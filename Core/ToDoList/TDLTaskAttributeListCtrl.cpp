@@ -154,8 +154,8 @@ CTDLTaskAttributeListCtrl::CTDLTaskAttributeListCtrl(const CToDoCtrlData& data,
 	m_bGrouped(FALSE),
 	m_aSortedGroupedItems(*this),
 	m_reminders(rems),
-	m_eSingleFileLink(FES_GOBUTTON),
-	m_cbMultiFileLink(FES_GOBUTTON),
+	m_eSingleFileLink(FES_GOBUTTON | FES_RELATIVEPATHS),
+	m_cbMultiFileLink(FES_GOBUTTON | FES_RELATIVEPATHS),
 	m_iconCache(FALSE), // small icons
 	m_dwTimeTrackingTask(0),
 	m_bTaskIDChangeSinceLastEdit(FALSE)
