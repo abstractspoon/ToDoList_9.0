@@ -12956,6 +12956,8 @@ void CToDoListWnd::OnUpdateEditUndoRedo(CCmdUI* pCmdUI, BOOL bUndo)
 
 void CToDoListWnd::OnViewCycleTaskViews() 
 {
+	CLockUpdates lu(*this);
+
 	GetToDoCtrl().SetNextTaskView();
 
 	if (m_nMaxState == TDCMS_MAXCOMMENTS)
@@ -12969,24 +12971,22 @@ void CToDoListWnd::OnUpdateViewCycleTaskViews(CCmdUI* pCmdUI)
 
 void CToDoListWnd::OnViewToggleTreeandList() 
 {
-	CFilteredToDoCtrl& tdc = GetToDoCtrl();
-
-	switch (tdc.GetTaskView())
+	switch (GetToDoCtrl().GetTaskView())
 	{
 	case FTCV_TASKTREE:
-		tdc.SetTaskView(FTCV_TASKLIST);
+		OnActivateTaskView(ID_ACTIVATEVIEW_LISTVIEW);
 		break;
 
 	case FTCV_TASKLIST:
 	default:
-		tdc.SetTaskView(FTCV_TASKTREE);
+		OnActivateTaskView(ID_ACTIVATEVIEW_TASKTREE);
 		break;
 	}
 }
 
 void CToDoListWnd::OnUpdateViewToggleTreeandList(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(TRUE);
+	pCmdUI->Enable(GetToDoCtrl().IsListViewTabShowing());
 }
 
 void CToDoListWnd::OnViewToggletasksandcomments() 
@@ -13811,27 +13811,26 @@ void CToDoListWnd::OnUpdateViewShowRemindersWindow(CCmdUI* pCmdUI)
 
 void CToDoListWnd::OnUpdateActivateTaskView(CCmdUI* pCmdUI)
 {
-	pCmdUI->Enable(TDC::MapViewIDToTaskView(pCmdUI->m_nID) != GetToDoCtrl().GetTaskView());
+	if (m_nMaxState == TDCMS_MAXCOMMENTS)
+		pCmdUI->Enable(TRUE);
+	else
+		pCmdUI->Enable(TDC::MapViewIDToTaskView(pCmdUI->m_nID) != GetToDoCtrl().GetTaskView());
 }
 
 void CToDoListWnd::OnActivateTaskView(UINT nCmdID)
 {
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+
+	FTC_VIEW nOldView = tdc.GetTaskView();
 	FTC_VIEW nNewView = TDC::MapViewIDToTaskView(nCmdID);
 
-	if (nNewView == tdc.GetTaskView())
-		return;
-
 	CLockUpdates lu(*this);
-	tdc.SetTaskView(nNewView);
 
-	// If 'Maximise Comments' is active then switch to the maximised 
-	// view to be consistent with similar behaviour elsewhere
+	if (nNewView != nOldView)
+		tdc.SetTaskView(nNewView);
+
 	if (m_nMaxState == TDCMS_MAXCOMMENTS)
-	{
-		m_nMaxState = TDCMS_MAXTASKLIST;
-		tdc.SetMaximizeState(m_nMaxState);
-	}
+		OnMaximizeTasklist();
 }
 
 LRESULT CToDoListWnd::OnModifyKeyboardShortcuts(WPARAM /*wp*/, LPARAM /*lp*/)
