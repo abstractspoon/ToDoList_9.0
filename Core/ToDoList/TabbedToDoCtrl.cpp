@@ -2312,6 +2312,7 @@ void CTabbedToDoCtrl::ReposTaskCtrl(const CRect& rTasks)
 void CTabbedToDoCtrl::ShowTaskCtrl(BOOL bShow)
 {
 	FTC_VIEW nView = GetTaskView();
+	int nShow = (bShow ? SW_SHOW : SW_HIDE);
 
 	switch (nView)
 	{
@@ -2321,7 +2322,10 @@ void CTabbedToDoCtrl::ShowTaskCtrl(BOOL bShow)
 		break;
 
 	case FTCV_TASKLIST:
-		m_taskList.ShowWindow(bShow ? SW_SHOW : SW_HIDE);
+		m_taskList.ShowWindow(nShow);
+		m_taskList.EnableWindow(bShow);
+
+		ShowListViewSpecificCtrls(bShow);
 		break;
 
 	case FTCV_UIEXTENSION1:
@@ -2340,6 +2344,16 @@ void CTabbedToDoCtrl::ShowTaskCtrl(BOOL bShow)
 	case FTCV_UIEXTENSION14:
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
+		{
+			IUIExtensionWindow* pExtWnd = GetExtensionWnd(nView);
+			ASSERT(pExtWnd);
+
+			if (pExtWnd)
+			{
+				::ShowWindow(pExtWnd->GetHwnd(), nShow);
+				::EnableWindow(pExtWnd->GetHwnd(), bShow);
+			}
+		}
 		break;
 
 	default:
@@ -2347,7 +2361,7 @@ void CTabbedToDoCtrl::ShowTaskCtrl(BOOL bShow)
 	}
 
 	// handle tab control
-	m_tabViews.ShowWindow(bShow && HasStyle(TDCS_SHOWTREELISTBAR) ? SW_SHOW : SW_HIDE);
+	m_tabViews.ShowWindow((bShow && HasStyle(TDCS_SHOWTREELISTBAR)) ? SW_SHOW : SW_HIDE);
 }
 
 BOOL CTabbedToDoCtrl::OnEraseBkgnd(CDC* pDC)

@@ -681,6 +681,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_UNMAXTASKLISTANDCOMMENTS, OnUpdateUnmaximizeTasklistAndComments)
 	ON_UPDATE_COMMAND_UI(ID_WINDOW1, OnUpdateWindow)
 
+	ON_UPDATE_COMMAND_UI_RANGE(ID_ACTIVATEVIEW_TASKTREE, ID_ACTIVATEVIEW_UIEXTENSION16, OnUpdateActivateTaskView)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_EDIT_SETPRIORITYNONE, ID_EDIT_SETPRIORITY10, OnUpdateSetPriority)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_FILE_SAVE_USERSTORAGE1, ID_FILE_SAVE_USERSTORAGE16, OnUpdateFileSaveToUserStorage)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_NEWTASK, ID_NEWSUBTASK, OnUpdateNewTask)
@@ -13808,22 +13809,28 @@ void CToDoListWnd::OnUpdateViewShowRemindersWindow(CCmdUI* pCmdUI)
 	pCmdUI->Enable(TRUE);
 }
 
+void CToDoListWnd::OnUpdateActivateTaskView(CCmdUI* pCmdUI)
+{
+	pCmdUI->Enable(TDC::MapViewIDToTaskView(pCmdUI->m_nID) != GetToDoCtrl().GetTaskView());
+}
+
 void CToDoListWnd::OnActivateTaskView(UINT nCmdID)
 {
-	switch (nCmdID)
+	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	FTC_VIEW nNewView = TDC::MapViewIDToTaskView(nCmdID);
+
+	if (nNewView == tdc.GetTaskView())
+		return;
+
+	CLockUpdates lu(*this);
+	tdc.SetTaskView(nNewView);
+
+	// If 'Maximise Comments' is active then switch to the maximised 
+	// view to be consistent with similar behaviour elsewhere
+	if (m_nMaxState == TDCMS_MAXCOMMENTS)
 	{
-	case ID_ACTIVATEVIEW_TASKTREE:
-		GetToDoCtrl().SetTaskView(FTCV_TASKTREE);
-		break;
-
-	case ID_ACTIVATEVIEW_LISTVIEW:
-		GetToDoCtrl().SetTaskView(FTCV_TASKLIST);
-		break;
-
-	default:
-		ASSERT ((nCmdID >= ID_ACTIVATEVIEW_UIEXTENSION1) && (nCmdID <= ID_ACTIVATEVIEW_UIEXTENSION16));
-		GetToDoCtrl().SetTaskView((FTC_VIEW)(FTCV_UIEXTENSION1 + (nCmdID - ID_ACTIVATEVIEW_UIEXTENSION1)));
-		break;
+		m_nMaxState = TDCMS_MAXTASKLIST;
+		tdc.SetMaximizeState(m_nMaxState);
 	}
 }
 
