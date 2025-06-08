@@ -392,6 +392,7 @@ protected:
 	afx_msg void OnWindow(UINT nCmdID);
 
 	// Menu update handlers
+	afx_msg void OnUpdateActivateTaskView(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateAddtimetologfile(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateArchiveCompletedtasks(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateArchiveSelectedCompletedTasks(CCmdUI* pCmdUI);

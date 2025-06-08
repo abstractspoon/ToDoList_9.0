@@ -681,6 +681,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_UNMAXTASKLISTANDCOMMENTS, OnUpdateUnmaximizeTasklistAndComments)
 	ON_UPDATE_COMMAND_UI(ID_WINDOW1, OnUpdateWindow)
 
+	ON_UPDATE_COMMAND_UI_RANGE(ID_ACTIVATEVIEW_TASKTREE, ID_ACTIVATEVIEW_UIEXTENSION16, OnUpdateActivateTaskView)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_EDIT_SETPRIORITYNONE, ID_EDIT_SETPRIORITY10, OnUpdateSetPriority)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_FILE_SAVE_USERSTORAGE1, ID_FILE_SAVE_USERSTORAGE16, OnUpdateFileSaveToUserStorage)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_NEWTASK, ID_NEWSUBTASK, OnUpdateNewTask)
@@ -12955,6 +12956,8 @@ void CToDoListWnd::OnUpdateEditUndoRedo(CCmdUI* pCmdUI, BOOL bUndo)
 
 void CToDoListWnd::OnViewCycleTaskViews() 
 {
+	CLockUpdates lu(*this);
+
 	GetToDoCtrl().SetNextTaskView();
 
 	if (m_nMaxState == TDCMS_MAXCOMMENTS)
@@ -12968,24 +12971,22 @@ void CToDoListWnd::OnUpdateViewCycleTaskViews(CCmdUI* pCmdUI)
 
 void CToDoListWnd::OnViewToggleTreeandList() 
 {
-	CFilteredToDoCtrl& tdc = GetToDoCtrl();
-
-	switch (tdc.GetTaskView())
+	switch (GetToDoCtrl().GetTaskView())
 	{
 	case FTCV_TASKTREE:
-		tdc.SetTaskView(FTCV_TASKLIST);
+		OnActivateTaskView(ID_ACTIVATEVIEW_LISTVIEW);
 		break;
 
 	case FTCV_TASKLIST:
 	default:
-		tdc.SetTaskView(FTCV_TASKTREE);
+		OnActivateTaskView(ID_ACTIVATEVIEW_TASKTREE);
 		break;
 	}
 }
 
 void CToDoListWnd::OnUpdateViewToggleTreeandList(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(TRUE);
+	pCmdUI->Enable(GetToDoCtrl().IsListViewTabShowing());
 }
 
 void CToDoListWnd::OnViewToggletasksandcomments() 
@@ -13808,23 +13809,28 @@ void CToDoListWnd::OnUpdateViewShowRemindersWindow(CCmdUI* pCmdUI)
 	pCmdUI->Enable(TRUE);
 }
 
+void CToDoListWnd::OnUpdateActivateTaskView(CCmdUI* pCmdUI)
+{
+	if (m_nMaxState == TDCMS_MAXCOMMENTS)
+		pCmdUI->Enable(TRUE);
+	else
+		pCmdUI->Enable(TDC::MapViewIDToTaskView(pCmdUI->m_nID) != GetToDoCtrl().GetTaskView());
+}
+
 void CToDoListWnd::OnActivateTaskView(UINT nCmdID)
 {
-	switch (nCmdID)
-	{
-	case ID_ACTIVATEVIEW_TASKTREE:
-		GetToDoCtrl().SetTaskView(FTCV_TASKTREE);
-		break;
+	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
-	case ID_ACTIVATEVIEW_LISTVIEW:
-		GetToDoCtrl().SetTaskView(FTCV_TASKLIST);
-		break;
+	FTC_VIEW nOldView = tdc.GetTaskView();
+	FTC_VIEW nNewView = TDC::MapViewIDToTaskView(nCmdID);
 
-	default:
-		ASSERT ((nCmdID >= ID_ACTIVATEVIEW_UIEXTENSION1) && (nCmdID <= ID_ACTIVATEVIEW_UIEXTENSION16));
-		GetToDoCtrl().SetTaskView((FTC_VIEW)(FTCV_UIEXTENSION1 + (nCmdID - ID_ACTIVATEVIEW_UIEXTENSION1)));
-		break;
-	}
+	CLockUpdates lu(*this);
+
+	if (nNewView != nOldView)
+		tdc.SetTaskView(nNewView);
+
+	if (m_nMaxState == TDCMS_MAXCOMMENTS)
+		OnMaximizeTasklist();
 }
 
 LRESULT CToDoListWnd::OnModifyKeyboardShortcuts(WPARAM /*wp*/, LPARAM /*lp*/)
