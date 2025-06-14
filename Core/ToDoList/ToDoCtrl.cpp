@@ -6603,6 +6603,9 @@ BOOL CToDoCtrl::PasteTasksToTree(const CTaskFile& tasks, HTREEITEM htiDestParent
 		SelectItem(m_taskTree.GetChildItem());
 	}
 	
+	// Update attribute editor with any additional list data
+	m_ctrlAttributes.SetAutoListData(TDCA_ALL, m_tldAll);
+
 	SetModified(TDCA_PASTE);
 	UpdateControls();
 	
@@ -7797,6 +7800,9 @@ BOOL CToDoCtrl::MergeTasks(const CTaskFile& tasks, BOOL bMergeByID)
 		if (m_aCustomAttribDefs.Append(aImportedDefs))
 			OnCustomAttributesChanged();
 	}
+
+	// Update attribute editor with any additional list data
+	m_ctrlAttributes.SetAutoListData(TDCA_ALL, m_tldAll);
 
 	SetModified(TDCA_PASTE, aTaskIDs);
 	return TRUE;
